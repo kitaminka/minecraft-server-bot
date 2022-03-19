@@ -1,0 +1,23 @@
+{
+  "welcome_message_embed": {
+    "url": "",
+    "title": "Welcome!",
+    "description": "New member: %v",
+    "color": "",
+    "footer": {
+      "text": "",
+      "icon_url": ""
+    },
+    "image": {
+      "url": ""
+    },
+    "thumbnail": {
+      "url": ""
+    },
+    "author": {
+      "url": "",
+      "name": "",
+      "icon_url": ""
+    }
+  }
+}
