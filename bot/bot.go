@@ -27,8 +27,5 @@ func StartBot(token string) {
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
 
-	err = discordSession.Close()
-	if err != nil {
-		return
-	}
+	discordSession.Close()
 }
