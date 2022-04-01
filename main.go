@@ -3,15 +3,15 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"github.com/kitaminka/server-bot/bot"
-	"github.com/kitaminka/server-bot/database"
+	"github.com/kitaminka/server-bot/db"
+	"github.com/kitaminka/server-bot/util"
 	"log"
 	"os"
 )
 
 var (
-	Token             string
-	MongoUri          string
-	MongoDatabaseName string
+	Token    string
+	MongoUri string
 )
 
 func init() {
@@ -21,10 +21,10 @@ func init() {
 	}
 	Token = os.Getenv("DISCORD_TOKEN")
 	MongoUri = os.Getenv("MONGODB_URI")
-	MongoDatabaseName = os.Getenv("MONGODB_DATABASE")
 }
 
 func main() {
-	database.Connect(MongoUri, MongoDatabaseName)
+	util.LoadConfig()
+	db.Connect(MongoUri)
 	bot.StartBot(Token)
 }

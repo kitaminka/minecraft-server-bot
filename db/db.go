@@ -1,4 +1,4 @@
-package database
+package db
 
 import (
 	"go.mongodb.org/mongo-driver/mongo"
@@ -6,12 +6,18 @@ import (
 	"log"
 )
 
-var (
-	MongoClient       mongo.Client
-	MongoDatabaseName string
+const (
+	MongoDatabaseName    = "server-bot"
+	MemberCollectionName = "members"
 )
 
-func Connect(mongoUri, mongoDatabaseName string) {
+var MongoClient mongo.Client
+
+type ServerMember struct {
+	ID string
+}
+
+func Connect(mongoUri string) {
 	mongoClient, err := mongo.Connect(nil, options.Client().ApplyURI(mongoUri))
 	if err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
@@ -20,5 +26,4 @@ func Connect(mongoUri, mongoDatabaseName string) {
 	log.Print("Successfully connected to MongoDB")
 
 	MongoClient = *mongoClient
-	MongoDatabaseName = mongoDatabaseName
 }

@@ -3,22 +3,24 @@ package bot
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/server-bot/handlers"
+	"github.com/kitaminka/server-bot/util"
 	"log"
 	"os"
 	"os/signal"
 )
 
 func StartBot(token string) {
-	discordSession, err := discordgo.New("Bot " + token)
+	session, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Fatalf("Error creating Discord session: %v", err)
 	}
 
-	discordSession.AddHandler(handlers.GuildMemberAdd)
+	session.AddHandler(handlers.GuildMemberAdd)
+	session.AddHandler(handlers.InteractionCreate)
 
-	discordSession.Identify.Intents = 1535
+	session.Identify.Intents = util.Config.Intents
 
-	err = discordSession.Open()
+	err = session.Open()
 	if err != nil {
 		log.Fatalf("Error opening Discord session: %v", err)
 	}
@@ -27,5 +29,5 @@ func StartBot(token string) {
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
 
-	discordSession.Close()
+	session.Close()
 }
