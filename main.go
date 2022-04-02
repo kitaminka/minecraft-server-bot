@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"github.com/kitaminka/server-bot/bot"
+	"github.com/kitaminka/server-bot/config"
 	"github.com/kitaminka/server-bot/db"
-	"github.com/kitaminka/server-bot/util"
 	"log"
 	"os"
 )
@@ -24,7 +24,7 @@ func init() {
 }
 
 func main() {
-	util.LoadConfig()
+	config.LoadConfig()
 	db.Connect(MongoUri)
 	bot.StartBot(Token)
 }

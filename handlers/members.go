@@ -3,15 +3,15 @@ package handlers
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/kitaminka/server-bot/config"
 	"github.com/kitaminka/server-bot/db"
-	"github.com/kitaminka/server-bot/util"
 	"log"
 )
 
 func GuildMemberAdd(session *discordgo.Session, guildMemberAdd *discordgo.GuildMemberAdd) {
 	guild, _ := session.Guild(guildMemberAdd.GuildID)
 
-	_, err := session.ChannelMessageSendComplex(util.Config.Channels.WelcomeMessageChannel, &(discordgo.MessageSend{
+	_, err := session.ChannelMessageSendComplex(config.Config.Channels.WelcomeMessageChannel, &(discordgo.MessageSend{
 		Content: fmt.Sprintf("<@%v>", guildMemberAdd.User.ID),
 		Embeds: []*discordgo.MessageEmbed{
 			{
@@ -29,17 +29,8 @@ func GuildMemberAdd(session *discordgo.Session, guildMemberAdd *discordgo.GuildM
 				Fields:      nil,
 			},
 		},
-		TTS: false,
-		Components: []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{
-			Label:    "Создать профиль",
-			Style:    discordgo.PrimaryButton,
-			Disabled: false,
-			Emoji: discordgo.ComponentEmoji{
-				Name: "➕",
-			},
-			URL:      "",
-			CustomID: "create_profile",
-		}}}},
+		TTS:             false,
+		Components:      nil,
 		Files:           nil,
 		AllowedMentions: nil,
 		Reference:       nil,

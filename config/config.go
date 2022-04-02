@@ -1,4 +1,4 @@
-package util
+package config
 
 import (
 	"encoding/json"
@@ -8,9 +8,9 @@ import (
 	"os"
 )
 
-var Config ConfigType
+var Config Configuration
 
-type ConfigType struct {
+type Configuration struct {
 	RemoveApplicationCommands bool             `json:"removeApplicationCommands"`
 	Guild                     string           `json:"guild"`
 	Intents                   discordgo.Intent `json:"intents"`

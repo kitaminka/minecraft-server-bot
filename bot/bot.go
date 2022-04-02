@@ -2,8 +2,8 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/kitaminka/server-bot/config"
 	"github.com/kitaminka/server-bot/handlers"
-	"github.com/kitaminka/server-bot/util"
 	"log"
 	"os"
 	"os/signal"
@@ -18,7 +18,7 @@ func StartBot(token string) {
 	session.AddHandler(handlers.GuildMemberAdd)
 	session.AddHandler(handlers.InteractionCreate)
 
-	session.Identify.Intents = util.Config.Intents
+	session.Identify.Intents = config.Config.Intents
 
 	err = session.Open()
 	if err != nil {
@@ -32,8 +32,9 @@ func StartBot(token string) {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
+	// TODO Check if it works correctly
 
-	if util.Config.RemoveApplicationCommands {
+	if config.Config.RemoveApplicationCommands {
 		handlers.RemoveApplicationCommands(session)
 	}
 }
