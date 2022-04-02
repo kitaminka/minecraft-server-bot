@@ -17,7 +17,7 @@ var (
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Panicf("Error loading .env file: %v", err)
 	}
 	Token = os.Getenv("DISCORD_TOKEN")
 	MongoUri = os.Getenv("MONGODB_URI")

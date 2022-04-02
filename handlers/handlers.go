@@ -6,6 +6,6 @@ import (
 
 func InteractionCreate(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	if interactionCreate.Type.String() == "ApplicationCommand" {
-		Commands[interactionCreate.ID].Handler(session, interactionCreate)
+		Commands[interactionCreate.ApplicationCommandData().Name].Handler(session, interactionCreate)
 	}
 }

@@ -12,7 +12,7 @@ import (
 func StartBot(token string) {
 	session, err := discordgo.New("Bot " + token)
 	if err != nil {
-		log.Fatalf("Error creating Discord session: %v", err)
+		log.Panicf("Error creating Discord session: %v", err)
 	}
 
 	session.AddHandler(handlers.GuildMemberAdd)
@@ -22,12 +22,18 @@ func StartBot(token string) {
 
 	err = session.Open()
 	if err != nil {
-		log.Fatalf("Error opening Discord session: %v", err)
+		log.Panicf("Error opening Discord session: %v", err)
 	}
+
+	handlers.CreateApplicationCommands(session)
+
+	defer session.Close()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
 
-	session.Close()
+	if util.Config.RemoveApplicationCommands {
+		handlers.RemoveApplicationCommands(session)
+	}
 }

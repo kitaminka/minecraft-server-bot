@@ -20,7 +20,7 @@ type ServerMember struct {
 func Connect(mongoUri string) {
 	mongoClient, err := mongo.Connect(nil, options.Client().ApplyURI(mongoUri))
 	if err != nil {
-		log.Fatalf("Error connecting to MongoDB: %v", err)
+		log.Panicf("Error connecting to MongoDB: %v", err)
 	}
 
 	log.Print("Successfully connected to MongoDB")

@@ -11,9 +11,10 @@ import (
 var Config ConfigType
 
 type ConfigType struct {
-	Guild    string           `json:"guild"`
-	Intents  discordgo.Intent `json:"intents"`
-	Channels struct {
+	RemoveApplicationCommands bool             `json:"removeApplicationCommands"`
+	Guild                     string           `json:"guild"`
+	Intents                   discordgo.Intent `json:"intents"`
+	Channels                  struct {
 		WelcomeMessageChannel string `json:"welcomeMessageChannel"`
 	} `json:"channels"`
 }
@@ -21,7 +22,7 @@ type ConfigType struct {
 func LoadConfig() {
 	jsonFile, err := os.Open("config.json")
 	if err != nil {
-		log.Fatalf("Error opening config.json file: %v", err)
+		log.Panicf("Error opening config.json file: %v", err)
 	}
 
 	defer jsonFile.Close()
@@ -30,11 +31,11 @@ func LoadConfig() {
 
 	err = json.Unmarshal(byteValue, &Config)
 	if err != nil {
-		log.Fatalf("Error loading config: %v", err)
+		log.Panicf("Error loading config: %v", err)
 	}
 
 	if Config.Guild == "" {
-		log.Fatalf("Guild is not set in config")
+		log.Panicf("Guild is not set in config")
 	}
 
 	log.Print("Successfully loaded config")

@@ -1,4 +1,5 @@
 {
+  "removeApplicationCommands": true,
   "guild": "909856906582040626",
   "intents": 1535,
   "channels": {
