@@ -15,7 +15,7 @@ type Configuration struct {
 	Guild                     string           `json:"guild"`
 	Intents                   discordgo.Intent `json:"intents"`
 	Channels                  struct {
-		WelcomeMessageChannel string `json:"welcomeMessageChannel"`
+		WhitelistInfoChannel string `json:"whitelistInfoChannel"`
 	} `json:"channels"`
 }
 

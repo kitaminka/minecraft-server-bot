@@ -4,14 +4,16 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kitaminka/server-bot/bot"
 	"github.com/kitaminka/server-bot/config"
-	"github.com/kitaminka/server-bot/db"
+	"github.com/kitaminka/server-bot/connection"
 	"log"
 	"os"
 )
 
 var (
-	Token    string
-	MongoUri string
+	Token        string
+	MongoUri     string
+	RconAddress  string
+	RconPassword string
 )
 
 func init() {
@@ -21,10 +23,14 @@ func init() {
 	}
 	Token = os.Getenv("DISCORD_TOKEN")
 	MongoUri = os.Getenv("MONGODB_URI")
+	RconAddress = os.Getenv("RCON_ADDRESS")
+	RconPassword = os.Getenv("RCON_PASSWORD")
 }
 
 func main() {
 	config.LoadConfig()
-	db.Connect(MongoUri)
+	connection.ConnectMongo(MongoUri)
+	connection.ConnectRcon(RconAddress, RconPassword)
+	connection.GetWhitelist()
 	bot.StartBot(Token)
 }

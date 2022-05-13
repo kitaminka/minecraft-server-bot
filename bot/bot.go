@@ -15,8 +15,7 @@ func StartBot(token string) {
 		log.Panicf("Error creating Discord session: %v", err)
 	}
 
-	session.AddHandler(handlers.GuildMemberAdd)
-	session.AddHandler(handlers.InteractionCreate)
+	handlers.AddHandlers(session)
 
 	session.Identify.Intents = config.Config.Intents
 

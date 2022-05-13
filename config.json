@@ -3,6 +3,6 @@
   "guild": "909856906582040626",
   "intents": 1535,
   "channels": {
-    "welcomeMessageChannel": "957693593693339698"
+    "whitelistInfoChannel": "957693593693339698"
   }
 }

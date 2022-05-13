@@ -1,4 +1,4 @@
-package db
+package connection
 
 import (
 	"github.com/bwmarrin/discordgo"
@@ -13,13 +13,13 @@ const (
 	MemberCollectionName = "members"
 )
 
-var MongoClient mongo.Client
+var MongoClient *mongo.Client
 
 type ServerMember struct {
 	ID string
 }
 
-func Connect(mongoUri string) {
+func ConnectMongo(mongoUri string) {
 	mongoClient, err := mongo.Connect(nil, options.Client().ApplyURI(mongoUri))
 	if err != nil {
 		log.Panicf("Error connecting to MongoDB: %v", err)
@@ -27,7 +27,7 @@ func Connect(mongoUri string) {
 
 	log.Print("Successfully connected to MongoDB")
 
-	MongoClient = *mongoClient
+	MongoClient = mongoClient
 }
 func CreateNewMember(member discordgo.Member) {
 	_, exists := GetMember(member.User.ID)
