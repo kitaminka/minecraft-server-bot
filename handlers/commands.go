@@ -3,7 +3,9 @@ package handlers
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/server-bot/config"
+	"github.com/kitaminka/server-bot/connection"
 	"log"
+	"strings"
 )
 
 type Command struct {
@@ -16,13 +18,34 @@ var Commands = map[string]Command{
 		ApplicationCommand: &discordgo.ApplicationCommand{
 			Type:        discordgo.ChatApplicationCommand,
 			Name:        "ping",
-			Description: "Тестовая команда",
+			Description: "Pong!",
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Pong!",
+					Flags:   1 << 6,
+				},
+			})
+
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
+			}
+		},
+	},
+	"whitelist": {
+		ApplicationCommand: &discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
+			Name:        "whitelist",
+			Description: "Get player whitelist",
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			players := connection.GetPlayerWhitelist()
+			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: strings.Join(players, " "),
 					Flags:   1 << 6,
 				},
 			})

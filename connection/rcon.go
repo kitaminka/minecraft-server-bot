@@ -1,9 +1,9 @@
 package connection
 
 import (
-	"fmt"
 	"github.com/willroberts/minecraft-client"
 	"log"
+	"strings"
 )
 
 var RconClient *minecraft.Client
@@ -22,7 +22,8 @@ func ConnectRcon(rconAddress, rconPassword string) {
 	RconClient = rconClient
 }
 
-func GetWhitelist() {
+func GetPlayerWhitelist() []string {
 	message, _ := RconClient.SendCommand("whitelist list")
-	fmt.Println(message.Body)
+	players := strings.Split(message.Body[33:], ", ")
+	return players
 }

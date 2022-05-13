@@ -31,6 +31,5 @@ func main() {
 	config.LoadConfig()
 	connection.ConnectMongo(MongoUri)
 	connection.ConnectRcon(RconAddress, RconPassword)
-	connection.GetWhitelist()
 	bot.StartBot(Token)
 }
