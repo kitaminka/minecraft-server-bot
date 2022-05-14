@@ -2,8 +2,8 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/kitaminka/server-bot/config"
-	"github.com/kitaminka/server-bot/handlers"
+	"github.com/kitaminka/minecraft-server-bot/config"
+	"github.com/kitaminka/minecraft-server-bot/handlers"
 	"log"
 	"os"
 	"os/signal"

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	MongoDatabaseName    = "server-bot"
+	MongoDatabaseName    = "minecraft-server-bot"
 	MemberCollectionName = "members"
 )
 

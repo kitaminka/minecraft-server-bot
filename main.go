@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/kitaminka/server-bot/bot"
-	"github.com/kitaminka/server-bot/config"
-	"github.com/kitaminka/server-bot/connection"
+	"github.com/kitaminka/minecraft-server-bot/bot"
+	"github.com/kitaminka/minecraft-server-bot/config"
+	"github.com/kitaminka/minecraft-server-bot/connection"
 	"log"
 	"os"
 )

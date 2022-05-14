@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/kitaminka/server-bot/config"
-	"github.com/kitaminka/server-bot/connection"
+	"github.com/kitaminka/minecraft-server-bot/config"
+	"github.com/kitaminka/minecraft-server-bot/connection"
 	"log"
 	"strings"
 )
