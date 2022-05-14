@@ -1,4 +1,4 @@
-module github.com/kitaminka/server-bot
+module github.com/kitaminka/minecraft-server-bot
 
 go 1.17
 
