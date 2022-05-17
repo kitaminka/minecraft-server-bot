@@ -1,8 +1,7 @@
 {
-  "removeApplicationCommands": true,
-  "guild": "909856906582040626",
+  "removeCommands": true,
   "intents": 1535,
   "channels": {
-    "whitelistInfoChannel": "957693593693339698"
+    "whitelistInfo": "957693593693339698"
   }
 }

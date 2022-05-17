@@ -18,12 +18,17 @@ func ConnectRcon(rconAddress, rconPassword string) {
 	if err != nil {
 		log.Panicf("Error RCON authenticating: %v", err)
 	}
+	log.Print("Successfully connected to RCON")
 
 	RconClient = rconClient
 }
 
 func GetPlayerWhitelist() []string {
-	message, _ := RconClient.SendCommand("whitelist list")
+	message, err := RconClient.SendCommand("whitelist list")
+	if err != nil {
+		log.Printf("Error sending command: %v", err)
+		return nil
+	}
 	players := strings.Split(message.Body[33:], ", ")
 	return players
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var Handlers = []func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate){
+var Handlers = []interface{}{
 	func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 		if interactionCreate.Type.String() == "ApplicationCommand" {
 			Commands[interactionCreate.ApplicationCommandData().Name].Handler(session, interactionCreate)

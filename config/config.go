@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,12 +12,33 @@ import (
 var Config Configuration
 
 type Configuration struct {
-	RemoveApplicationCommands bool             `json:"removeApplicationCommands"`
-	Guild                     string           `json:"guild"`
-	Intents                   discordgo.Intent `json:"intents"`
-	Channels                  struct {
-		WhitelistInfoChannel string `json:"whitelistInfoChannel"`
+	Token          string
+	MongoUri       string
+	Guild          string
+	RemoveCommands bool             `json:"removeCommands"`
+	Intents        discordgo.Intent `json:"intents"`
+	Rcon           struct {
+		Address  string
+		Password string
+	}
+	Channels struct {
+		WhitelistInfo string `json:"whitelistInfo"`
 	} `json:"channels"`
+}
+
+func LoadEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Panicf("Error loading .env file: %v", err)
+	}
+
+	Config.Token = os.Getenv("DISCORD_TOKEN")
+	Config.MongoUri = os.Getenv("MONGODB_URI")
+	Config.Rcon.Address = os.Getenv("RCON_ADDRESS")
+	Config.Rcon.Password = os.Getenv("RCON_PASSWORD")
+	Config.Guild = os.Getenv("GUILD_ID")
+
+	log.Print("Successfully loaded .env file")
 }
 
 func LoadConfig() {
@@ -32,10 +54,6 @@ func LoadConfig() {
 	err = json.Unmarshal(byteValue, &Config)
 	if err != nil {
 		log.Panicf("Error loading config: %v", err)
-	}
-
-	if Config.Guild == "" {
-		log.Panicf("Guild is not set in config")
 	}
 
 	log.Print("Successfully loaded config")
