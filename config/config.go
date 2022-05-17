@@ -21,6 +21,9 @@ type Configuration struct {
 		Address  string
 		Password string
 	}
+	Roles struct {
+		Admin string `json:"admin"`
+	} `json:"roles"`
 	Channels struct {
 		WhitelistInfo string `json:"whitelistInfo"`
 	} `json:"channels"`
@@ -37,6 +40,7 @@ func LoadEnv() {
 	Config.Rcon.Address = os.Getenv("RCON_ADDRESS")
 	Config.Rcon.Password = os.Getenv("RCON_PASSWORD")
 	Config.Guild = os.Getenv("GUILD_ID")
+	Config.Roles.Admin = os.Getenv("ADMIN_ROLE_ID")
 
 	log.Print("Successfully loaded .env file")
 }

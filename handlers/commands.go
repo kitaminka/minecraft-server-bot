@@ -45,13 +45,39 @@ var Commands = map[string]Command{
 			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: strings.Join(players, " "),
-					Flags:   1 << 6,
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "Whitelist",
+							Description: "Player nicknames: **" + strings.Join(players, ", ") + "**",
+							Timestamp:   "",
+							Color:       9383347,
+						},
+					},
 				},
 			})
 
 			if err != nil {
 				log.Printf("Error responding to interaction: %v", err)
+			}
+		},
+	},
+	"register": {
+		ApplicationCommand: &discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
+			Name:        "register",
+			Description: "Register new player",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "nickname",
+					Description: "Minecraft nickname",
+				},
+			},
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				return
 			}
 		},
 	},

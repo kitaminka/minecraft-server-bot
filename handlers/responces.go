@@ -11,9 +11,9 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
 				{
-					Title:       "Ошибка",
+					Title:       "Error",
 					Description: errorMessage,
-					Color:       8523465,
+					Color:       9383347,
 				},
 			},
 			Flags: 1 << 6,

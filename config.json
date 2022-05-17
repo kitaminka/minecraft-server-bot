@@ -1,5 +1,5 @@
 {
-  "removeCommands": true,
+  "removeCommands": false,
   "intents": 1535,
   "channels": {
     "whitelistInfo": "957693593693339698"
