@@ -50,7 +50,7 @@ var Commands = map[string]Command{
 							Title:       "Whitelist",
 							Description: "Player nicknames: **" + strings.Join(players, ", ") + "**",
 							Timestamp:   "",
-							Color:       9383347,
+							Color:       config.Config.EmbedColors.Primary,
 						},
 					},
 				},

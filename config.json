@@ -1,6 +1,10 @@
 {
   "removeCommands": false,
   "intents": 1535,
+  "embedColors": {
+    "primary": 9383347,
+    "error": 13179932
+  },
   "channels": {
     "whitelistInfo": "957693593693339698"
   }

@@ -21,6 +21,10 @@ type Configuration struct {
 		Address  string
 		Password string
 	}
+	EmbedColors struct {
+		Primary int `json:"primary"`
+		Error   int `json:"error"`
+	} `json:"embedColors"`
 	Roles struct {
 		Admin string `json:"admin"`
 	} `json:"roles"`

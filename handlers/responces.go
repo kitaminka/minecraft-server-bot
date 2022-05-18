@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/kitaminka/minecraft-server-bot/config"
 	"log"
 )
 
@@ -13,7 +14,7 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 				{
 					Title:       "Error",
 					Description: errorMessage,
-					Color:       9383347,
+					Color:       config.Config.EmbedColors.Error,
 				},
 			},
 			Flags: 1 << 6,
