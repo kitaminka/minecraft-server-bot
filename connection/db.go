@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	Chars                = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 	MongoDatabaseName    = "minecraft-server-bot"
 	MemberCollectionName = "players"
 )

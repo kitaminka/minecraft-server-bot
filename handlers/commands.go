@@ -98,19 +98,16 @@ var Commands = map[string]Command{
 			minecraftNickname := options[1].StringValue()
 
 			exists := connection.CreateNewPlayer(member, minecraftNickname)
+			password, success := connection.RegisterPlayer(minecraftNickname)
 
-			if exists {
-				interactionRespondError(session, interactionCreate.Interaction, "Member already exists.")
-				return
-			}
+			channel, err := session.UserChannelCreate(member.User.ID)
 
-			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
+			if err == nil {
+				_, err = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
 					Embeds: []*discordgo.MessageEmbed{
 						{
-							Title:       "Member created",
-							Description: "Successfully created new member",
+							Title:       "Minecraft Server Night Pix",
+							Description: "You have been successfully registered on the server.",
 							Fields: []*discordgo.MessageEmbedField{
 								{
 									Name:   "Discord member",
@@ -122,16 +119,96 @@ var Commands = map[string]Command{
 									Value:  minecraftNickname,
 									Inline: true,
 								},
+								{
+									Name:   "Password",
+									Value:  password,
+									Inline: true,
+								},
 							},
 							Color: config.Config.EmbedColors.Primary,
 						},
 					},
-					Flags: 1 << 6,
-				},
-			})
+				})
+			}
 
-			if err != nil {
-				log.Printf("Error responding to interaction: %v", err)
+			if exists {
+				interactionRespondError(session, interactionCreate.Interaction, "Member already exists.")
+				return
+			} else if !success {
+				interactionRespondError(session, interactionCreate.Interaction, "Error occurred registering player.")
+				return
+			} else if err != nil {
+				log.Printf("Error sending message: %v", err)
+
+				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Player registered",
+								Description: "Successfully registered new player.\n**Error occurred sending password!**",
+								Fields: []*discordgo.MessageEmbedField{
+									{
+										Name:   "Discord member",
+										Value:  fmt.Sprintf("<@%v>", member.User.ID),
+										Inline: true,
+									},
+									{
+										Name:   "Minecraft nickname",
+										Value:  minecraftNickname,
+										Inline: true,
+									},
+									{
+										Name:   "Password",
+										Value:  fmt.Sprintf("||%v||", password),
+										Inline: true,
+									},
+								},
+								Color: config.Config.EmbedColors.Primary,
+							},
+						},
+						Flags: 1 << 6,
+					},
+				})
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			} else {
+				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Player registered",
+								Description: "Successfully registered new player.",
+								Fields: []*discordgo.MessageEmbedField{
+									{
+										Name:   "Discord member",
+										Value:  fmt.Sprintf("<@%v>", member.User.ID),
+										Inline: true,
+									},
+									{
+										Name:   "Minecraft nickname",
+										Value:  minecraftNickname,
+										Inline: true,
+									},
+									{
+										Name:   "Password",
+										Value:  fmt.Sprintf("||%v||", password),
+										Inline: true,
+									},
+								},
+								Color: config.Config.EmbedColors.Primary,
+							},
+						},
+						Flags: 1 << 6,
+					},
+				})
+
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
 			}
 		},
 	},
