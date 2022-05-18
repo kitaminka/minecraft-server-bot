@@ -27,6 +27,7 @@ func ConnectRcon(rconAddress, rconPassword string) {
 }
 func RegisterPlayer(minecraftNickname string) (string, bool) {
 	password := generatePassword()
+	// TODO Add check if user was registered
 	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin register %v %v", minecraftNickname, password))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
