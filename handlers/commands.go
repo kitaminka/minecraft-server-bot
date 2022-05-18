@@ -97,7 +97,7 @@ var Commands = map[string]Command{
 
 			minecraftNickname := options[1].StringValue()
 
-			exists := connection.CreateNewMember(member, minecraftNickname)
+			exists := connection.CreateNewPlayer(member, minecraftNickname)
 
 			if exists {
 				interactionRespondError(session, interactionCreate.Interaction, "Member already exists.")
@@ -151,7 +151,6 @@ func CreateApplicationCommands(session *discordgo.Session) {
 		}
 	}
 }
-
 func RemoveApplicationCommands(session *discordgo.Session) {
 	for _, value := range Commands {
 		err := session.ApplicationCommandDelete(session.State.User.ID, config.Config.Guild, value.ApplicationCommand.ID)

@@ -22,7 +22,6 @@ func ConnectRcon(rconAddress, rconPassword string) {
 
 	RconClient = rconClient
 }
-
 func GetPlayerWhitelist() []string {
 	message, err := RconClient.SendCommand("whitelist list")
 	if err != nil {

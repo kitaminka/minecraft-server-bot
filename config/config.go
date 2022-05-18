@@ -48,7 +48,6 @@ func LoadEnv() {
 
 	log.Print("Successfully loaded .env file")
 }
-
 func LoadConfig() {
 	jsonFile, err := os.Open("config.json")
 	if err != nil {

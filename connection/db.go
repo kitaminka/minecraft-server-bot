@@ -10,12 +10,12 @@ import (
 
 const (
 	MongoDatabaseName    = "minecraft-server-bot"
-	MemberCollectionName = "members"
+	MemberCollectionName = "players"
 )
 
 var MongoClient *mongo.Client
 
-type ServerMember struct {
+type Player struct {
 	ID                string
 	MinecraftNickname string
 }
@@ -30,8 +30,8 @@ func ConnectMongo(mongoUri string) {
 
 	MongoClient = mongoClient
 }
-func CreateNewMember(member *discordgo.Member, minecraftNickname string) bool {
-	_, exists := GetMember(member.User.ID)
+func CreateNewPlayer(member *discordgo.Member, minecraftNickname string) bool {
+	_, exists := GetPlayer(member.User.ID)
 
 	if exists {
 		return true
@@ -46,8 +46,8 @@ func CreateNewMember(member *discordgo.Member, minecraftNickname string) bool {
 
 	return false
 }
-func GetMember(id string) (ServerMember, bool) {
-	var serverMember ServerMember
+func GetPlayer(id string) (Player, bool) {
+	var serverMember Player
 
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
 
@@ -55,7 +55,7 @@ func GetMember(id string) (ServerMember, bool) {
 
 	err := result.Decode(&serverMember)
 	if err != nil {
-		return ServerMember{}, false
+		return Player{}, false
 	}
 
 	return serverMember, true
