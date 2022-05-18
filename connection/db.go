@@ -16,7 +16,8 @@ const (
 var MongoClient *mongo.Client
 
 type ServerMember struct {
-	ID string
+	ID                string
+	MinecraftNickname string
 }
 
 func ConnectMongo(mongoUri string) {
@@ -29,19 +30,21 @@ func ConnectMongo(mongoUri string) {
 
 	MongoClient = mongoClient
 }
-func CreateNewMember(member discordgo.Member) {
+func CreateNewMember(member *discordgo.Member, minecraftNickname string) bool {
 	_, exists := GetMember(member.User.ID)
 
 	if exists {
-		return
+		return true
 	}
 
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
 
-	_, err := collection.InsertOne(nil, bson.D{{"id", member.User.ID}})
+	_, err := collection.InsertOne(nil, bson.D{{"id", member.User.ID}, {"minecraftNickname", minecraftNickname}})
 	if err != nil {
 		log.Printf("Error creating new member: %v", err)
 	}
+
+	return false
 }
 func GetMember(id string) (ServerMember, bool) {
 	var serverMember ServerMember

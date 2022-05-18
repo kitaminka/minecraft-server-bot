@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/minecraft-server-bot/config"
 	"github.com/kitaminka/minecraft-server-bot/connection"
@@ -48,8 +49,7 @@ var Commands = map[string]Command{
 					Embeds: []*discordgo.MessageEmbed{
 						{
 							Title:       "Whitelist",
-							Description: "Player nicknames: **" + strings.Join(players, ", ") + "**",
-							Timestamp:   "",
+							Description: fmt.Sprintf("Player nicknames: **%v**", strings.Join(players, ", ")),
 							Color:       config.Config.EmbedColors.Primary,
 						},
 					},
@@ -68,9 +68,16 @@ var Commands = map[string]Command{
 			Description: "Register new player",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
+					Type:        discordgo.ApplicationCommandOptionUser,
+					Name:        "member",
+					Description: "Discord server member",
+					Required:    true,
+				},
+				{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        "nickname",
 					Description: "Minecraft nickname",
+					Required:    true,
 				},
 			},
 		},
@@ -78,6 +85,53 @@ var Commands = map[string]Command{
 			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
+			}
+
+			options := interactionCreate.ApplicationCommandData().Options
+
+			member, err := session.GuildMember(config.Config.Guild, options[0].UserValue(session).ID)
+			if err != nil {
+				log.Printf("Error getting member %v", err)
+				return
+			}
+
+			minecraftNickname := options[1].StringValue()
+
+			exists := connection.CreateNewMember(member, minecraftNickname)
+
+			if exists {
+				interactionRespondError(session, interactionCreate.Interaction, "Member already exists.")
+				return
+			}
+
+			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "Member created",
+							Description: "Successfully created new member",
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:   "Discord member",
+									Value:  fmt.Sprintf("<@%v>", member.User.ID),
+									Inline: true,
+								},
+								{
+									Name:   "Minecraft nickname",
+									Value:  minecraftNickname,
+									Inline: true,
+								},
+							},
+							Color: config.Config.EmbedColors.Primary,
+						},
+					},
+					Flags: 1 << 6,
+				},
+			})
+
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
 			}
 		},
 	},
