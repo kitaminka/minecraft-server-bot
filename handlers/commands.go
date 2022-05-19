@@ -221,6 +221,31 @@ var Commands = map[string]Command{
 			}
 		},
 	},
+	"unregister": {
+		ApplicationCommand: &discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
+			Name:        "unregister",
+			Description: "Unregister player",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionUser,
+					Name:        "member",
+					Description: "Discord server member",
+					Required:    true,
+				},
+			},
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				return
+			}
+
+			// TODO Unregister player
+			// TODO Send reply to interaction
+		},
+	},
+	// TODO Add reset-password command
 }
 
 func CreateApplicationCommands(session *discordgo.Session) {

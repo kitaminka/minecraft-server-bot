@@ -8,6 +8,9 @@ import (
 	"log"
 )
 
+// TODO Move constants to config
+// TODO Change all bool to error
+
 const (
 	Chars                = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 	MongoDatabaseName    = "minecraft-server-bot"

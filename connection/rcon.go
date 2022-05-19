@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// TODO Change all bool to error
+
 var RconClient *minecraft.Client
 
 func ConnectRcon(rconAddress, rconPassword string) {
@@ -27,12 +29,21 @@ func ConnectRcon(rconAddress, rconPassword string) {
 }
 func RegisterPlayer(minecraftNickname string) (string, bool) {
 	password := generatePassword()
+	UnregisterPlayer(minecraftNickname)
 	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin register %v %v", minecraftNickname, password))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
 		return "", false
 	}
 	return password, true
+}
+func UnregisterPlayer(minecraftNickname string) bool {
+	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin unregister %v", minecraftNickname))
+	if err != nil {
+		log.Printf("Error sending command: %v", err)
+		return false
+	}
+	return true
 }
 func AddPlayerWhitelist(minecraftNickname string) bool {
 	message, err := RconClient.SendCommand(fmt.Sprintf("whitelist add %v", minecraftNickname))
