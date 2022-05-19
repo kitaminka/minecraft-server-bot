@@ -95,15 +95,24 @@ var Commands = map[string]Command{
 				return
 			}
 
-			exists := connection.CreateNewPlayer(member, minecraftNickname)
-			if exists {
-				interactionRespondError(session, interactionCreate.Interaction, "Member already exists.")
+			successPlayer := connection.CreatePlayer(member, minecraftNickname)
+			if !successPlayer {
+				interactionRespondError(session, interactionCreate.Interaction, "Error occurred creating player.")
 				return
 			}
 
-			password, success := connection.RegisterPlayer(minecraftNickname)
-			if !success {
+			successWhitelist := connection.AddPlayerWhitelist(minecraftNickname)
+			if !successWhitelist {
+				interactionRespondError(session, interactionCreate.Interaction, "Error occurred whitelisting player.")
+				connection.DeletePlayer(member)
+				return
+			}
+
+			password, successRegistration := connection.RegisterPlayer(minecraftNickname)
+			if !successRegistration {
 				interactionRespondError(session, interactionCreate.Interaction, "Error occurred registering player.")
+				connection.DeletePlayer(member)
+				connection.RemovePlayerWhitelist(minecraftNickname)
 				return
 			}
 

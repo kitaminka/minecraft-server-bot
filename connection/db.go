@@ -17,7 +17,7 @@ const (
 var MongoClient *mongo.Client
 
 type Player struct {
-	ID                string
+	DiscordId         string
 	MinecraftNickname string
 }
 
@@ -31,28 +31,55 @@ func ConnectMongo(mongoUri string) {
 
 	MongoClient = mongoClient
 }
-func CreateNewPlayer(member *discordgo.Member, minecraftNickname string) bool {
-	_, exists := GetPlayer(member.User.ID)
+func CreatePlayer(member *discordgo.Member, minecraftNickname string) bool {
+	_, successDiscord := GetPlayerByDiscord(member)
+	_, successMinecraft := GetPlayerByMinecraft(minecraftNickname)
 
-	if exists {
-		return true
+	if successDiscord || successMinecraft {
+		return false
 	}
 
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
 
-	_, err := collection.InsertOne(nil, bson.D{{"id", member.User.ID}, {"minecraftNickname", minecraftNickname}})
+	_, err := collection.InsertOne(nil, bson.D{{"discordId", member.User.ID}, {"minecraftNickname", minecraftNickname}})
 	if err != nil {
-		log.Printf("Error creating new member: %v", err)
+		log.Printf("Error creating player: %v", err)
+		return false
 	}
 
-	return false
+	return true
 }
-func GetPlayer(id string) (Player, bool) {
+func DeletePlayer(member *discordgo.Member) bool {
+	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
+
+	_, err := collection.DeleteOne(nil, bson.D{{"discordId", member.User.ID}})
+	if err != nil {
+		log.Printf("Error deleting player: %v", err)
+		return false
+	}
+
+	return true
+}
+func GetPlayerByDiscord(member *discordgo.Member) (Player, bool) {
+	var serverPlayer Player
+
+	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
+
+	result := collection.FindOne(nil, bson.D{{"discordId", member.User.ID}})
+
+	err := result.Decode(&serverPlayer)
+	if err != nil {
+		return Player{}, false
+	}
+
+	return serverPlayer, true
+}
+func GetPlayerByMinecraft(minecraftNickname string) (Player, bool) {
 	var serverMember Player
 
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
 
-	result := collection.FindOne(nil, bson.D{{"id", id}})
+	result := collection.FindOne(nil, bson.D{{"minecraftNickname", minecraftNickname}})
 
 	err := result.Decode(&serverMember)
 	if err != nil {
