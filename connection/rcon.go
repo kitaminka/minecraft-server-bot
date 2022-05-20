@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-// TODO Change all bool to error
-
 var RconClient *minecraft.Client
 
 func ConnectRcon(rconAddress, rconPassword string) {
@@ -27,51 +25,54 @@ func ConnectRcon(rconAddress, rconPassword string) {
 
 	RconClient = rconClient
 }
-func RegisterPlayer(minecraftNickname string) (string, bool) {
+func RegisterPlayer(minecraftNickname string) (string, error) {
 	password := generatePassword()
-	UnregisterPlayer(minecraftNickname)
-	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin register %v %v", minecraftNickname, password))
+	err := UnregisterPlayer(minecraftNickname)
+	if err != nil {
+		return "", err
+	}
+	_, err = RconClient.SendCommand(fmt.Sprintf("nlogin register %v %v", minecraftNickname, password))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
-		return "", false
+		return "", err
 	}
-	return password, true
+	return password, nil
 }
-func UnregisterPlayer(minecraftNickname string) bool {
+func UnregisterPlayer(minecraftNickname string) error {
 	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin unregister %v", minecraftNickname))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
-		return false
+		return err
 	}
-	return true
+	return nil
 }
-func AddPlayerWhitelist(minecraftNickname string) bool {
+func AddPlayerWhitelist(minecraftNickname string) error {
 	message, err := RconClient.SendCommand(fmt.Sprintf("whitelist add %v", minecraftNickname))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
-		return false
+		return err
 	} else if message.Body == "Player is already whitelisted" {
 		log.Printf("Player already exists: %v", minecraftNickname)
-		return false
+		return err
 	}
-	return true
+	return nil
 }
-func RemovePlayerWhitelist(minecraftNickname string) bool {
+func RemovePlayerWhitelist(minecraftNickname string) error {
 	_, err := RconClient.SendCommand(fmt.Sprintf("whitelist remove %v", minecraftNickname))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
-		return false
+		return err
 	}
-	return true
+	return nil
 }
-func GetPlayerWhitelist() []string {
+func GetPlayerWhitelist() ([]string, error) {
 	message, err := RconClient.SendCommand("whitelist list")
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
-		return nil
+		return nil, err
 	}
 	players := strings.Split(message.Body[33:], ", ")
-	return players
+	return players, nil
 }
 func generatePassword() string {
 	var password string

@@ -42,8 +42,12 @@ var Commands = map[string]Command{
 			Description: "Get player whitelist",
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			players := connection.GetPlayerWhitelist()
-			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			players, err := connection.GetPlayerWhitelist()
+			if err != nil {
+				interactionRespondError(session, interactionCreate.Interaction, "Error occurred getting whitelist.")
+			}
+
+			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Embeds: []*discordgo.MessageEmbed{
@@ -95,21 +99,21 @@ var Commands = map[string]Command{
 				return
 			}
 
-			successPlayer := connection.CreatePlayer(member, minecraftNickname)
-			if !successPlayer {
+			err = connection.CreatePlayer(member, minecraftNickname)
+			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, "Error occurred creating player.")
 				return
 			}
 
-			successWhitelist := connection.AddPlayerWhitelist(minecraftNickname)
-			if !successWhitelist {
+			err = connection.AddPlayerWhitelist(minecraftNickname)
+			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, "Error occurred whitelisting player.")
 				connection.DeletePlayer(member)
 				return
 			}
 
-			password, successRegistration := connection.RegisterPlayer(minecraftNickname)
-			if !successRegistration {
+			password, err := connection.RegisterPlayer(minecraftNickname)
+			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, "Error occurred registering player.")
 				connection.DeletePlayer(member)
 				connection.RemovePlayerWhitelist(minecraftNickname)

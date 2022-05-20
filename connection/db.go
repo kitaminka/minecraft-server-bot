@@ -34,12 +34,14 @@ func ConnectMongo(mongoUri string) {
 
 	MongoClient = mongoClient
 }
-func CreatePlayer(member *discordgo.Member, minecraftNickname string) bool {
-	_, successDiscord := GetPlayerByDiscord(member)
-	_, successMinecraft := GetPlayerByMinecraft(minecraftNickname)
+func CreatePlayer(member *discordgo.Member, minecraftNickname string) error {
+	_, errDiscord := GetPlayerByDiscord(member)
+	_, errMinecraft := GetPlayerByMinecraft(minecraftNickname)
 
-	if successDiscord || successMinecraft {
-		return false
+	if errDiscord != nil {
+		return errDiscord
+	} else if errMinecraft != nil {
+		return errMinecraft
 	}
 
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
@@ -47,23 +49,23 @@ func CreatePlayer(member *discordgo.Member, minecraftNickname string) bool {
 	_, err := collection.InsertOne(nil, bson.D{{"discordId", member.User.ID}, {"minecraftNickname", minecraftNickname}})
 	if err != nil {
 		log.Printf("Error creating player: %v", err)
-		return false
+		return err
 	}
 
-	return true
+	return nil
 }
-func DeletePlayer(member *discordgo.Member) bool {
+func DeletePlayer(member *discordgo.Member) error {
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
 
 	_, err := collection.DeleteOne(nil, bson.D{{"discordId", member.User.ID}})
 	if err != nil {
 		log.Printf("Error deleting player: %v", err)
-		return false
+		return err
 	}
 
-	return true
+	return nil
 }
-func GetPlayerByDiscord(member *discordgo.Member) (Player, bool) {
+func GetPlayerByDiscord(member *discordgo.Member) (Player, error) {
 	var serverPlayer Player
 
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
@@ -72,12 +74,12 @@ func GetPlayerByDiscord(member *discordgo.Member) (Player, bool) {
 
 	err := result.Decode(&serverPlayer)
 	if err != nil {
-		return Player{}, false
+		return Player{}, err
 	}
 
-	return serverPlayer, true
+	return serverPlayer, nil
 }
-func GetPlayerByMinecraft(minecraftNickname string) (Player, bool) {
+func GetPlayerByMinecraft(minecraftNickname string) (Player, error) {
 	var serverMember Player
 
 	collection := MongoClient.Database(MongoDatabaseName).Collection(MemberCollectionName)
@@ -86,8 +88,8 @@ func GetPlayerByMinecraft(minecraftNickname string) (Player, bool) {
 
 	err := result.Decode(&serverMember)
 	if err != nil {
-		return Player{}, false
+		return Player{}, err
 	}
 
-	return serverMember, true
+	return serverMember, nil
 }
