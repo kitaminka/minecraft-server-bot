@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const passwordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
 var RconClient *minecraft.Client
 
 func ConnectRcon(rconAddress, rconPassword string) {
@@ -79,7 +81,7 @@ func generatePassword() string {
 
 	for i := 0; i < 8; i++ {
 		res, _ := rand.Int(rand.Reader, big.NewInt(61))
-		password += string(Chars[res.Int64()])
+		password += string(passwordChars[res.Int64()])
 	}
 
 	return password

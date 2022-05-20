@@ -7,5 +7,9 @@
   },
   "channels": {
     "whitelistInfo": "957693593693339698"
+  },
+  "mongo": {
+    "database": "minecraft-server-bot",
+    "memberCollection": "players"
   }
 }

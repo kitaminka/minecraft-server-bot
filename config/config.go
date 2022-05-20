@@ -13,7 +13,6 @@ var Config Configuration
 
 type Configuration struct {
 	Token          string
-	MongoUri       string
 	Guild          string
 	RemoveCommands bool             `json:"removeCommands"`
 	Intents        discordgo.Intent `json:"intents"`
@@ -31,6 +30,11 @@ type Configuration struct {
 	Channels struct {
 		WhitelistInfo string `json:"whitelistInfo"`
 	} `json:"channels"`
+	Mongo struct {
+		Uri              string
+		Database         string `json:"database"`
+		MemberCollection string `json:"memberCollection"`
+	} `json:"mongo"`
 }
 
 func LoadEnv() {
@@ -40,7 +44,7 @@ func LoadEnv() {
 	}
 
 	Config.Token = os.Getenv("DISCORD_TOKEN")
-	Config.MongoUri = os.Getenv("MONGODB_URI")
+	Config.Mongo.Uri = os.Getenv("MONGODB_URI")
 	Config.Rcon.Address = os.Getenv("RCON_ADDRESS")
 	Config.Rcon.Password = os.Getenv("RCON_PASSWORD")
 	Config.Guild = os.Getenv("GUILD_ID")
