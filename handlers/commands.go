@@ -101,20 +101,20 @@ var Commands = map[string]Command{
 
 			err = connection.CreatePlayer(member, minecraftNickname)
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, "Error occurred creating player.")
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
 				return
 			}
 
 			err = connection.AddPlayerWhitelist(minecraftNickname)
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, "Error occurred whitelisting player.")
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
 				connection.DeletePlayer(member)
 				return
 			}
 
 			password, err := connection.RegisterPlayer(minecraftNickname)
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, "Error occurred registering player.")
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
 				connection.DeletePlayer(member)
 				connection.RemovePlayerWhitelist(minecraftNickname)
 				return
