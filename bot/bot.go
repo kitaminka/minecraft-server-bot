@@ -13,7 +13,7 @@ import (
 func StartBot() {
 	config.LoadConfig()
 	config.LoadEnv()
-	connection.ConnectMongo(config.Config.MongoUri)
+	connection.ConnectMongo()
 	connection.ConnectRcon(config.Config.Rcon.Address, config.Config.Rcon.Password)
 
 	session, err := discordgo.New("Bot " + config.Config.Token)
