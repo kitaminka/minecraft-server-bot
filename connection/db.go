@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/minecraft-server-bot/config"
 	"go.mongodb.org/mongo-driver/bson"
@@ -30,13 +31,13 @@ func CreatePlayer(member *discordgo.Member, minecraftNickname string) error {
 	_, errDiscord := GetPlayerByDiscord(member)
 	_, errMinecraft := GetPlayerByMinecraft(minecraftNickname)
 
-	if errDiscord != nil {
-		return errDiscord
-	} else if errMinecraft != nil {
-		return errMinecraft
+	if errDiscord == nil {
+		return fmt.Errorf("player already exists")
+	} else if errMinecraft == nil {
+		return fmt.Errorf("player already exists")
 	}
 
-	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.MemberCollection)
+	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.PlayerCollection)
 
 	_, err := collection.InsertOne(nil, bson.D{{"discordId", member.User.ID}, {"minecraftNickname", minecraftNickname}})
 	if err != nil {
@@ -47,7 +48,7 @@ func CreatePlayer(member *discordgo.Member, minecraftNickname string) error {
 	return nil
 }
 func DeletePlayer(member *discordgo.Member) error {
-	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.MemberCollection)
+	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.PlayerCollection)
 
 	_, err := collection.DeleteOne(nil, bson.D{{"discordId", member.User.ID}})
 	if err != nil {
@@ -60,7 +61,7 @@ func DeletePlayer(member *discordgo.Member) error {
 func GetPlayerByDiscord(member *discordgo.Member) (Player, error) {
 	var serverPlayer Player
 
-	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.MemberCollection)
+	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.PlayerCollection)
 
 	result := collection.FindOne(nil, bson.D{{"discordId", member.User.ID}})
 
@@ -74,7 +75,7 @@ func GetPlayerByDiscord(member *discordgo.Member) (Player, error) {
 func GetPlayerByMinecraft(minecraftNickname string) (Player, error) {
 	var serverMember Player
 
-	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.MemberCollection)
+	collection := MongoClient.Database(config.Config.Mongo.Database).Collection(config.Config.Mongo.PlayerCollection)
 
 	result := collection.FindOne(nil, bson.D{{"minecraftNickname", minecraftNickname}})
 

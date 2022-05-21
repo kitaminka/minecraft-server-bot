@@ -33,7 +33,7 @@ type Configuration struct {
 	Mongo struct {
 		Uri              string
 		Database         string `json:"database"`
-		MemberCollection string `json:"memberCollection"`
+		PlayerCollection string `json:"playerCollection"`
 	} `json:"mongo"`
 }
 

@@ -10,6 +10,6 @@
   },
   "mongo": {
     "database": "minecraft-server-bot",
-    "memberCollection": "players"
+    "playerCollection": "players"
   }
 }
