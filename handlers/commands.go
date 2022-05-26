@@ -91,6 +91,17 @@ var Commands = map[string]Command{
 				return
 			}
 
+			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Flags: 1 << 6,
+				},
+			})
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
+				return
+			}
+
 			options := interactionCreate.ApplicationCommandData().Options
 			minecraftNickname := options[1].StringValue()
 			member, err := session.GuildMember(config.Config.Guild, options[0].UserValue(session).ID)
@@ -101,20 +112,20 @@ var Commands = map[string]Command{
 
 			err = connection.CreatePlayer(member, minecraftNickname)
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
 				return
 			}
 
 			err = connection.AddPlayerWhitelist(minecraftNickname)
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
 				connection.DeletePlayer(member)
 				return
 			}
 
 			password, err := connection.RegisterPlayer(minecraftNickname)
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
 				connection.DeletePlayer(member)
 				connection.RemovePlayerWhitelist(minecraftNickname)
 				return
@@ -155,7 +166,7 @@ var Commands = map[string]Command{
 				log.Printf("Error sending message: %v", err)
 
 				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Type: discordgo.InteractionResponseUpdateMessage,
 					Data: &discordgo.InteractionResponseData{
 						Embeds: []*discordgo.MessageEmbed{
 							{
@@ -181,7 +192,6 @@ var Commands = map[string]Command{
 								Color: config.Config.EmbedColors.Primary,
 							},
 						},
-						Flags: 1 << 6,
 					},
 				})
 				if err != nil {
@@ -190,35 +200,32 @@ var Commands = map[string]Command{
 				return
 			}
 
-			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Embeds: []*discordgo.MessageEmbed{
-						{
-							Title:       "Player registered",
-							Description: "Successfully registered new player.",
-							Fields: []*discordgo.MessageEmbedField{
-								{
-									Name:   "Discord member",
-									Value:  fmt.Sprintf("<@%v>", member.User.ID),
-									Inline: true,
-								},
-								{
-									Name:   "Minecraft nickname",
-									Value:  minecraftNickname,
-									Inline: true,
-								},
-								{
-									Name:   "Password",
-									Value:  fmt.Sprintf("||%v||", password),
-									Inline: true,
-								},
+			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
+				Embeds: []*discordgo.MessageEmbed{
+					{
+						Title:       "Player registered",
+						Description: "Successfully registered new player.",
+						Fields: []*discordgo.MessageEmbedField{
+							{
+								Name:   "Discord member",
+								Value:  fmt.Sprintf("<@%v>", member.User.ID),
+								Inline: true,
 							},
-							Color: config.Config.EmbedColors.Primary,
+							{
+								Name:   "Minecraft nickname",
+								Value:  minecraftNickname,
+								Inline: true,
+							},
+							{
+								Name:   "Password",
+								Value:  fmt.Sprintf("||%v||", password),
+								Inline: true,
+							},
 						},
+						Color: config.Config.EmbedColors.Primary,
 					},
-					Flags: 1 << 6,
 				},
+				Flags: 1 << 6,
 			})
 			if err != nil {
 				log.Printf("Error responding to interaction: %v", err)
