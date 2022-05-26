@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// TODO Rewrite logging
+
 const passwordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 var RconClient *minecraft.Client

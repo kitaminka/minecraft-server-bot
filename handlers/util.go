@@ -25,6 +25,7 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 	})
 
 	if err != nil {
+		// TODO Remove logging, return error
 		log.Printf("Error responding to interaction: %v", err)
 	}
 }
