@@ -87,7 +87,10 @@ var Commands = map[string]Command{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
 				return
 			}
 
@@ -112,22 +115,40 @@ var Commands = map[string]Command{
 
 			err = connection.CreatePlayer(member, minecraftNickname)
 			if err != nil {
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
+				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
+				if err != nil {
+					log.Printf("Error sending message: %v", err)
+				}
 				return
 			}
 
 			err = connection.AddPlayerWhitelist(minecraftNickname)
 			if err != nil {
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
-				connection.DeletePlayer(member)
+				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
+				if err != nil {
+					log.Printf("Error sending message: %v", err)
+				}
+				err = connection.DeletePlayer(member)
+				if err != nil {
+					log.Printf("Error deleting player: %v", err)
+				}
 				return
 			}
 
 			password, err := connection.RegisterPlayer(minecraftNickname)
 			if err != nil {
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
-				connection.DeletePlayer(member)
-				connection.RemovePlayerWhitelist(minecraftNickname)
+				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
+				if err != nil {
+					log.Printf("Error sending message: %v", err)
+				}
+				err = connection.DeletePlayer(member)
+				if err != nil {
+					log.Printf("Error deleting player: %v", err)
+				}
+				err = connection.RemovePlayerWhitelist(minecraftNickname)
+				if err != nil {
+					log.Printf("Error removing player from whitelist: %v", err)
+				}
 				return
 			}
 

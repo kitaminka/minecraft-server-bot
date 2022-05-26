@@ -44,7 +44,6 @@ func RegisterPlayer(minecraftNickname string) (string, error) {
 func UnregisterPlayer(minecraftNickname string) error {
 	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin unregister %v", minecraftNickname))
 	if err != nil {
-		log.Printf("Error sending command: %v", err)
 		return err
 	}
 	return nil
@@ -56,7 +55,6 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 		return err
 	} else if message.Body == "Player is already whitelisted" {
 		err = errors.New("player already exists")
-		log.Printf("Error registring player: %v", err)
 		return err
 	}
 	return nil
@@ -64,7 +62,6 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 func RemovePlayerWhitelist(minecraftNickname string) error {
 	_, err := RconClient.SendCommand(fmt.Sprintf("whitelist remove %v", minecraftNickname))
 	if err != nil {
-		log.Printf("Error sending command: %v", err)
 		return err
 	}
 	return nil
