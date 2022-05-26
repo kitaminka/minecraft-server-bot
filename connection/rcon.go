@@ -2,14 +2,13 @@ package connection
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"github.com/willroberts/minecraft-client"
 	"log"
 	"math/big"
 	"strings"
 )
-
-// TODO Rewrite logging
 
 const passwordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -56,7 +55,8 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 		log.Printf("Error sending command: %v", err)
 		return err
 	} else if message.Body == "Player is already whitelisted" {
-		log.Printf("Player already exists: %v", minecraftNickname)
+		err = errors.New("player already exists")
+		log.Printf("Error registring player: %v", err)
 		return err
 	}
 	return nil

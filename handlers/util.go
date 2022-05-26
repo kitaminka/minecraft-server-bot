@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/minecraft-server-bot/config"
-	"log"
 )
 
 func createErrorEmbed(errorMessage string) *discordgo.MessageEmbed {
@@ -13,8 +12,8 @@ func createErrorEmbed(errorMessage string) *discordgo.MessageEmbed {
 		Color:       config.Config.EmbedColors.Error,
 	}
 }
-func interactionRespondError(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) {
-	err := session.InteractionRespond(interaction, &discordgo.InteractionResponse{
+func interactionRespondError(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) error {
+	return session.InteractionRespond(interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
@@ -23,11 +22,6 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 			Flags: 1 << 6,
 		},
 	})
-
-	if err != nil {
-		// TODO Remove logging, return error
-		log.Printf("Error responding to interaction: %v", err)
-	}
 }
 
 func followupErrorMessageCreate(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) (*discordgo.Message, error) {
