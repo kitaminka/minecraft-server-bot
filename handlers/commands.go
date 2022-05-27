@@ -3,11 +3,12 @@ package handlers
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/kitaminka/minecraft-server-bot/config"
 	"github.com/kitaminka/minecraft-server-bot/connection"
 	"log"
 	"strings"
 )
+
+var GuildId string
 
 type Command struct {
 	ApplicationCommand *discordgo.ApplicationCommand
@@ -44,7 +45,11 @@ var Commands = map[string]Command{
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			players, err := connection.GetPlayerWhitelist()
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, "Error occurred getting whitelist.")
+				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting whitelist: %v", err))
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
 			}
 
 			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -54,7 +59,7 @@ var Commands = map[string]Command{
 						{
 							Title:       "Whitelist",
 							Description: fmt.Sprintf("Player nicknames: **%v**", strings.Join(players, ", ")),
-							Color:       config.Config.EmbedColors.Primary,
+							Color:       PrimaryEmbedColor,
 						},
 					},
 				},
@@ -107,9 +112,13 @@ var Commands = map[string]Command{
 
 			options := interactionCreate.ApplicationCommandData().Options
 			minecraftNickname := options[1].StringValue()
-			member, err := session.GuildMember(config.Config.Guild, options[0].UserValue(session).ID)
+			member, err := session.GuildMember(GuildId, options[0].UserValue(session).ID)
 			if err != nil {
 				log.Printf("Error getting member %v", err)
+				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
+				if err != nil {
+					log.Printf("Error sending message: %v", err)
+				}
 				return
 			}
 
@@ -177,7 +186,7 @@ var Commands = map[string]Command{
 									Inline: true,
 								},
 							},
-							Color: config.Config.EmbedColors.Primary,
+							Color: PrimaryEmbedColor,
 						},
 					},
 				})
@@ -210,7 +219,7 @@ var Commands = map[string]Command{
 										Inline: true,
 									},
 								},
-								Color: config.Config.EmbedColors.Primary,
+								Color: PrimaryEmbedColor,
 							},
 						},
 					},
@@ -243,7 +252,7 @@ var Commands = map[string]Command{
 								Inline: true,
 							},
 						},
-						Color: config.Config.EmbedColors.Primary,
+						Color: PrimaryEmbedColor,
 					},
 				},
 				Flags: 1 << 6,
@@ -269,7 +278,10 @@ var Commands = map[string]Command{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
 				return
 			}
 
@@ -280,9 +292,11 @@ var Commands = map[string]Command{
 	// TODO Add reset-password command
 }
 
-func CreateApplicationCommands(session *discordgo.Session) {
+func CreateApplicationCommands(session *discordgo.Session, guildId string) {
+	GuildId = guildId
+
 	for index, value := range Commands {
-		cmd, err := session.ApplicationCommandCreate(session.State.User.ID, config.Config.Guild, value.ApplicationCommand)
+		cmd, err := session.ApplicationCommandCreate(session.State.User.ID, GuildId, value.ApplicationCommand)
 		if err != nil {
 			log.Panicf("Error creating '%v' command: %v", value.ApplicationCommand.Name, err)
 		}
@@ -296,7 +310,7 @@ func CreateApplicationCommands(session *discordgo.Session) {
 }
 func RemoveApplicationCommands(session *discordgo.Session) {
 	for _, value := range Commands {
-		err := session.ApplicationCommandDelete(session.State.User.ID, config.Config.Guild, value.ApplicationCommand.ID)
+		err := session.ApplicationCommandDelete(session.State.User.ID, GuildId, value.ApplicationCommand.ID)
 		if err != nil {
 			log.Panicf("Error deleting '%v' command: %v", value.ApplicationCommand.Name, err)
 		}

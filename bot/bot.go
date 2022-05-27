@@ -2,34 +2,32 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/kitaminka/minecraft-server-bot/config"
-	"github.com/kitaminka/minecraft-server-bot/connection"
 	"github.com/kitaminka/minecraft-server-bot/handlers"
 	"log"
 	"os"
 	"os/signal"
 )
 
-func StartBot() {
-	config.LoadConfig()
-	config.LoadEnv()
-	connection.ConnectMongo()
-	connection.ConnectRcon(config.Config.Rcon.Address, config.Config.Rcon.Password)
+const (
+	Intents        = 1535
+	RemoveCommands = false
+)
 
-	session, err := discordgo.New("Bot " + config.Config.Token)
+func StartBot(token, guildId string) {
+	session, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Panicf("Error creating Discord session: %v", err)
 	}
 
 	handlers.AddHandlers(session)
-	session.Identify.Intents = config.Config.Intents
+	session.Identify.Intents = Intents
 
 	err = session.Open()
 	if err != nil {
 		log.Panicf("Error opening Discord session: %v", err)
 	}
 
-	handlers.CreateApplicationCommands(session)
+	handlers.CreateApplicationCommands(session, guildId)
 
 	defer session.Close()
 
@@ -37,7 +35,7 @@ func StartBot() {
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
 
-	if config.Config.RemoveCommands {
+	if RemoveCommands {
 		handlers.RemoveApplicationCommands(session)
 	}
 }

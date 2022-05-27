@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/kitaminka/minecraft-server-bot/config"
 )
 
 func createErrorEmbed(errorMessage string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Error",
 		Description: errorMessage,
-		Color:       config.Config.EmbedColors.Error,
+		Color:       ErrorEmbedColor,
 	}
 }
 func interactionRespondError(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) error {
