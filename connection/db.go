@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	MongoDatabase         = "minecraft-server-bot"
-	MongoPlayerCollection = "players"
+	MongoDatabase           = "minecraft-server-bot"
+	MongoPlayerCollection   = "players"
+	MongoSettingsCollection = "settings"
 )
 
 var MongoClient *mongo.Client
@@ -89,4 +90,21 @@ func GetPlayerByMinecraft(minecraftNickname string) (Player, error) {
 	}
 
 	return serverMember, nil
+}
+func SetSettingValue(settingName, settingValue string) error {
+	var collection = MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
+
+	replaceResult, err := collection.ReplaceOne(nil, bson.D{{"name", settingName}}, bson.D{{"name", settingName}, {"value", settingValue}})
+	if err != nil {
+		return err
+	}
+
+	if replaceResult.ModifiedCount == 0 {
+		_, err := collection.InsertOne(nil, bson.D{{"name", settingName}, {"value", settingValue}})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

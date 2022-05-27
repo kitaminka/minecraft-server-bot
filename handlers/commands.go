@@ -70,6 +70,52 @@ var Commands = map[string]Command{
 			}
 		},
 	},
+	"settings": {
+		ApplicationCommand: &discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
+			Name:        "settings",
+			Description: "Settings management",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "set",
+					Description: "Set setting value",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:        discordgo.ApplicationCommandOptionString,
+							Name:        "name",
+							Description: "Setting name",
+							Required:    true,
+						},
+						{
+							Type:        discordgo.ApplicationCommandOptionString,
+							Name:        "value",
+							Description: "Setting value",
+							Required:    true,
+						},
+					},
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "view",
+					Description: "View all settings",
+				},
+			},
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			}
+
+			if interactionCreate.ApplicationCommandData().Options[0].Name == "set" {
+				connection.SetSettingValue(interactionCreate.ApplicationCommandData().Options[0].Options[0].StringValue(), interactionCreate.ApplicationCommandData().Options[0].Options[1].StringValue())
+			}
+		},
+	},
 	"register": {
 		ApplicationCommand: &discordgo.ApplicationCommand{
 			Type:        discordgo.ChatApplicationCommand,
