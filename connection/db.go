@@ -21,6 +21,10 @@ type Player struct {
 	DiscordId         string
 	MinecraftNickname string
 }
+type Setting struct {
+	Name  string
+	Value string
+}
 
 func ConnectMongo(mongoUri string) {
 	mongoClient, err := mongo.Connect(nil, options.Client().ApplyURI(mongoUri))
@@ -92,7 +96,7 @@ func GetPlayerByMinecraft(minecraftNickname string) (Player, error) {
 	return serverMember, nil
 }
 func SetSettingValue(settingName, settingValue string) error {
-	var collection = MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
+	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
 
 	replaceResult, err := collection.ReplaceOne(nil, bson.D{{"name", settingName}}, bson.D{{"name", settingName}, {"value", settingValue}})
 	if err != nil {
@@ -107,4 +111,18 @@ func SetSettingValue(settingName, settingValue string) error {
 	}
 
 	return nil
+}
+func GetSetting(settingName string) (Setting, error) {
+	var setting Setting
+
+	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
+
+	result := collection.FindOne(nil, bson.D{{"name", settingName}})
+
+	err := result.Decode(&setting)
+	if err != nil {
+		return Setting{}, err
+	}
+
+	return setting, nil
 }

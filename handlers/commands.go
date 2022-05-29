@@ -207,10 +207,10 @@ var Commands = map[string]Command{
 				return
 			}
 
-			channel, err := session.UserChannelCreate(member.User.ID)
+			channel, messageErr := session.UserChannelCreate(member.User.ID)
 
 			if err == nil {
-				_, err = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
+				_, messageErr = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
 					Embeds: []*discordgo.MessageEmbed{
 						{
 							Title:       "Minecraft Server Night Pix",
@@ -238,42 +238,9 @@ var Commands = map[string]Command{
 				})
 			}
 
-			if err != nil {
-				log.Printf("Error sending message: %v", err)
-
-				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseUpdateMessage,
-					Data: &discordgo.InteractionResponseData{
-						Embeds: []*discordgo.MessageEmbed{
-							{
-								Title:       "Player registered",
-								Description: "Successfully registered new player.\n**Error occurred sending password!**",
-								Fields: []*discordgo.MessageEmbedField{
-									{
-										Name:   "Discord member",
-										Value:  fmt.Sprintf("<@%v>", member.User.ID),
-										Inline: true,
-									},
-									{
-										Name:   "Minecraft nickname",
-										Value:  minecraftNickname,
-										Inline: true,
-									},
-									{
-										Name:   "Password",
-										Value:  fmt.Sprintf("||%v||", password),
-										Inline: true,
-									},
-								},
-								Color: PrimaryEmbedColor,
-							},
-						},
-					},
-				})
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
-				return
+			setting, roleErr := connection.GetSetting("minecraftRole")
+			if roleErr == nil {
+				roleErr = session.GuildMemberRoleAdd(GuildId, member.User.ID, setting.Value)
 			}
 
 			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
@@ -295,6 +262,16 @@ var Commands = map[string]Command{
 							{
 								Name:   "Password",
 								Value:  fmt.Sprintf("||%v||", password),
+								Inline: true,
+							},
+							{
+								Name:   "Message error",
+								Value:  fmt.Sprint(messageErr),
+								Inline: true,
+							},
+							{
+								Name:   "Role error",
+								Value:  fmt.Sprint(roleErr),
 								Inline: true,
 							},
 						},
@@ -331,8 +308,60 @@ var Commands = map[string]Command{
 				return
 			}
 
-			// TODO Unregister player
-			// TODO Send reply to interaction
+			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Flags: 1 << 6,
+				},
+			})
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
+				return
+			}
+
+			user := interactionCreate.Interaction.ApplicationCommandData().Options[0].UserValue(session)
+			member, err := session.GuildMember(GuildId, user.ID)
+			if err != nil {
+				log.Printf("Error getting member %v", err)
+				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
+				if err != nil {
+					log.Printf("Error sending message: %v", err)
+				}
+				return
+			}
+
+			player, err := connection.GetPlayerByDiscord(member)
+			if err != nil {
+				log.Printf("Error getting player: %v", err)
+				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
+				if err != nil {
+					log.Printf("Error sending message: %v", err)
+				}
+				return
+			}
+			unregisterErr := connection.UnregisterPlayer(player.MinecraftNickname)
+			if unregisterErr != nil {
+				return
+			}
+			whitelistErr := connection.RemovePlayerWhitelist(player.MinecraftNickname)
+			if whitelistErr != nil {
+				return
+			}
+			playerErr := connection.DeletePlayer(member)
+			if playerErr != nil {
+				return
+			}
+
+			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Flags: 1 << 6,
+				},
+			})
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
+				return
+			}
 		},
 	},
 	// TODO Add reset-password command
