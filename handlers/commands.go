@@ -42,10 +42,7 @@ var Commands = map[string]Command{
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			players, err := connection.GetPlayerWhitelist()
 			if err != nil {
-				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting whitelist: %v", err))
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting whitelist: %v", err))
 				return
 			}
 
@@ -114,10 +111,7 @@ var Commands = map[string]Command{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
@@ -131,10 +125,7 @@ var Commands = map[string]Command{
 
 				err := connection.SetSettingValue(settingName, settingValue)
 				if err != nil {
-					err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
-					if err != nil {
-						log.Printf("Error responding to interaction: %v", err)
-					}
+					interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
 					return
 				}
 
@@ -167,10 +158,8 @@ var Commands = map[string]Command{
 			} else if options[0].Name == "view" {
 				settings, err := connection.ViewSettings()
 				if err != nil {
-					err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
-					if err != nil {
-						log.Printf("Error responding to interaction: %v", err)
-					}
+					interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
+					return
 				}
 
 				var fields []*discordgo.MessageEmbedField
@@ -204,10 +193,7 @@ var Commands = map[string]Command{
 
 				err := connection.DeleteSetting(settingName)
 				if err != nil {
-					err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
-					if err != nil {
-						log.Printf("Error responding to interaction: %v", err)
-					}
+					interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
 					return
 				}
 
@@ -258,10 +244,7 @@ var Commands = map[string]Command{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
@@ -281,28 +264,19 @@ var Commands = map[string]Command{
 			member, err := session.GuildMember(GuildId, options[0].UserValue(session).ID)
 			if err != nil {
 				log.Printf("Error getting member %v", err)
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
 				return
 			}
 
 			err = connection.CreatePlayer(member, minecraftNickname)
 			if err != nil {
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
 				return
 			}
 
 			err = connection.AddPlayerWhitelist(minecraftNickname)
 			if err != nil {
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
 				err = connection.DeletePlayer(member)
 				if err != nil {
 					log.Printf("Error deleting player: %v", err)
@@ -312,10 +286,7 @@ var Commands = map[string]Command{
 
 			password, err := connection.RegisterPlayer(minecraftNickname)
 			if err != nil {
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
 				err = connection.DeletePlayer(member)
 				if err != nil {
 					log.Printf("Error deleting player: %v", err)
@@ -423,10 +394,7 @@ var Commands = map[string]Command{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
@@ -445,20 +413,14 @@ var Commands = map[string]Command{
 			member, err := session.GuildMember(GuildId, user.ID)
 			if err != nil {
 				log.Printf("Error getting member %v", err)
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
 				return
 			}
 
 			player, err := connection.GetPlayerByDiscord(member)
 			if err != nil {
 				log.Printf("Error getting player: %v", err)
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
 				return
 			}
 
@@ -526,104 +488,7 @@ var Commands = map[string]Command{
 			Description: "Reset player password",
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Flags: 1 << 6,
-				},
-			})
-			if err != nil {
-				log.Printf("Error responding to interaction: %v", err)
-				return
-			}
-
-			member := interactionCreate.Member
-
-			player, err := connection.GetPlayerByDiscord(member)
-			if err != nil {
-				log.Printf("Error getting player: %v", err)
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
-				return
-			}
-
-			password, err := connection.ResetPlayerPassword(player.MinecraftNickname)
-			if err != nil {
-				log.Printf("Error resetting player password: %v", err)
-				_, err := followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred resetting player password: %v", err))
-				if err != nil {
-					log.Printf("Error sending message: %v", err)
-				}
-				return
-			}
-
-			channel, err := session.UserChannelCreate(member.User.ID)
-
-			if err == nil {
-				_, err = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
-					Embeds: []*discordgo.MessageEmbed{
-						{
-							Title:       "Minecraft Server Night Pix",
-							Description: "Your password has been reset.",
-							Fields: []*discordgo.MessageEmbedField{
-								{
-									Name:   "Discord member",
-									Value:  fmt.Sprintf("<@%v>", member.User.ID),
-									Inline: true,
-								},
-								{
-									Name:   "Minecraft nickname",
-									Value:  player.MinecraftNickname,
-									Inline: true,
-								},
-								{
-									Name:   "Password",
-									Value:  fmt.Sprintf("||%v||", password),
-									Inline: true,
-								},
-							},
-							Color: PrimaryEmbedColor,
-						},
-					},
-				})
-			}
-			if err != nil {
-				log.Printf("Error sending message: %v", err)
-			}
-
-			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
-				Embeds: []*discordgo.MessageEmbed{
-					{
-						Title:       "Password reset",
-						Description: "Successfully reset password",
-						Color:       PrimaryEmbedColor,
-						Fields: []*discordgo.MessageEmbedField{
-							{
-								Name:   "Discord member",
-								Value:  fmt.Sprintf("<@%v>", member.User.ID),
-								Inline: true,
-							},
-							{
-								Name:   "Minecraft nickname",
-								Value:  player.MinecraftNickname,
-								Inline: true,
-							},
-							{
-								Name:   "Password",
-								Value:  fmt.Sprintf("||%v||", password),
-								Inline: true,
-							},
-						},
-					},
-				},
-				Flags: 1 << 6,
-			})
-			if err != nil {
-				log.Printf("Error sending message: %v", err)
-				return
-			}
+			resetPasswordHandler(session, interactionCreate)
 		},
 	},
 	"send-whitelist": {
@@ -642,29 +507,20 @@ var Commands = map[string]Command{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
 			channel := interactionCreate.ApplicationCommandData().Options[0].ChannelValue(session)
 
 			if channel.Type != discordgo.ChannelTypeGuildText {
-				err := interactionRespondError(session, interactionCreate.Interaction, "Wrong channel type.")
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, "Wrong channel type.")
 				return
 			}
 
 			players, err := connection.GetPlayers()
 			if err != nil {
-				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured getting players: %v", err))
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured getting players: %v", err))
 				return
 			}
 
@@ -694,19 +550,13 @@ var Commands = map[string]Command{
 				},
 			})
 			if err != nil {
-				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured sending whitelist: %v", err))
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured sending whitelist: %v", err))
 				return
 			}
 
 			err = connection.SetSettingValue("whitelistChannel", channel.ID)
 			if err != nil {
-				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured: %v", err))
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured: %v", err))
 				return
 			}
 			err = connection.SetSettingValue("whitelistMessage", message.ID)
@@ -715,10 +565,7 @@ var Commands = map[string]Command{
 				if err != nil {
 					log.Printf("Error deleting setting: %v", err)
 				}
-				err = interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured: %v", err))
-				if err != nil {
-					log.Printf("Error responding to interaction: %v", err)
-				}
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured: %v", err))
 				return
 			}
 

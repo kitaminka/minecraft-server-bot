@@ -14,8 +14,8 @@ func createErrorEmbed(errorMessage string) *discordgo.MessageEmbed {
 		Color:       ErrorEmbedColor,
 	}
 }
-func interactionRespondError(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) error {
-	return session.InteractionRespond(interaction, &discordgo.InteractionResponse{
+func interactionRespondError(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) {
+	err := session.InteractionRespond(interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
@@ -24,18 +24,115 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 			Flags: 1 << 6,
 		},
 	})
+	if err != nil {
+		log.Printf("Error responding to interaction: %v", err)
+	}
 }
-func followupErrorMessageCreate(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) (*discordgo.Message, error) {
-	message, err := session.FollowupMessageCreate(session.State.User.ID, interaction, true, &discordgo.WebhookParams{
+func followupErrorMessageCreate(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) {
+	_, err := session.FollowupMessageCreate(session.State.User.ID, interaction, true, &discordgo.WebhookParams{
 		Embeds: []*discordgo.MessageEmbed{
 			createErrorEmbed(errorMessage),
 		},
 		Flags: 1 << 6,
 	})
 	if err != nil {
-		return nil, err
+		log.Printf("Error sending message: %v", err)
 	}
-	return message, nil
+}
+
+func resetPasswordHandler(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Flags: 1 << 6,
+		},
+	})
+	if err != nil {
+		log.Printf("Error responding to interaction: %v", err)
+		return
+	}
+
+	member := interactionCreate.Member
+
+	player, err := connection.GetPlayerByDiscord(member)
+	if err != nil {
+		log.Printf("Error getting player: %v", err)
+		followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
+		return
+	}
+
+	password, err := connection.ResetPlayerPassword(player.MinecraftNickname)
+	if err != nil {
+		log.Printf("Error resetting player password: %v", err)
+		followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred resetting player password: %v", err))
+		return
+	}
+
+	channel, err := session.UserChannelCreate(member.User.ID)
+
+	if err == nil {
+		_, err = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Minecraft Server Night Pix",
+					Description: "Your password has been reset.",
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:   "Discord member",
+							Value:  fmt.Sprintf("<@%v>", member.User.ID),
+							Inline: true,
+						},
+						{
+							Name:   "Minecraft nickname",
+							Value:  player.MinecraftNickname,
+							Inline: true,
+						},
+						{
+							Name:   "Password",
+							Value:  fmt.Sprintf("||%v||", password),
+							Inline: true,
+						},
+					},
+					Color: PrimaryEmbedColor,
+				},
+			},
+		})
+	}
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+	}
+
+	_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title:       "Password reset",
+				Description: "Successfully reset password",
+				Color:       PrimaryEmbedColor,
+				Fields: []*discordgo.MessageEmbedField{
+					{
+						Name:   "Discord member",
+						Value:  fmt.Sprintf("<@%v>", member.User.ID),
+						Inline: true,
+					},
+					{
+						Name:   "Minecraft nickname",
+						Value:  player.MinecraftNickname,
+						Inline: true,
+					},
+					{
+						Name:   "Password",
+						Value:  fmt.Sprintf("||%v||", password),
+						Inline: true,
+					},
+				},
+			},
+		},
+		Flags: 1 << 6,
+	})
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+		return
+	}
 }
 
 func updateWhitelistMessage(session *discordgo.Session) {

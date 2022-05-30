@@ -13,9 +13,9 @@ const (
 
 var Handlers = []interface{}{
 	func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-		if interactionCreate.Type.String() == "ApplicationCommand" {
+		if interactionCreate.Type == discordgo.InteractionApplicationCommand {
 			Commands[interactionCreate.ApplicationCommandData().Name].Handler(session, interactionCreate)
-		} else if interactionCreate.Type.String() == "MessageComponent" {
+		} else if interactionCreate.Type == discordgo.InteractionMessageComponent {
 			Components[interactionCreate.MessageComponentData().CustomID].Handler(session, interactionCreate)
 		}
 	},
