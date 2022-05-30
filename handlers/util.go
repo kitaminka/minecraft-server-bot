@@ -22,7 +22,6 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 		},
 	})
 }
-
 func followupErrorMessageCreate(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) (*discordgo.Message, error) {
 	message, err := session.FollowupMessageCreate(session.State.User.ID, interaction, true, &discordgo.WebhookParams{
 		Embeds: []*discordgo.MessageEmbed{
