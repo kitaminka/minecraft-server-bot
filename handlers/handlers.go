@@ -15,6 +15,9 @@ var Handlers = []interface{}{
 			Commands[interactionCreate.ApplicationCommandData().Name].Handler(session, interactionCreate)
 		}
 	},
+	func(session *discordgo.Session, ready *discordgo.Ready) {
+		updateWhitelistMessage(session)
+	},
 }
 
 func AddHandlers(session *discordgo.Session) {

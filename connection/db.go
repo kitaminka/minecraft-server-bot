@@ -37,6 +37,20 @@ func ConnectMongo(mongoUri string) {
 
 	MongoClient = mongoClient
 }
+func GetPlayers() ([]Player, error) {
+	var players []Player
+
+	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
+
+	result, _ := collection.Find(nil, bson.D{})
+
+	err := result.All(nil, &players)
+	if err != nil {
+		return []Player{}, err
+	}
+
+	return players, nil
+}
 func CreatePlayer(member *discordgo.Member, minecraftNickname string) error {
 	_, errDiscord := GetPlayerByDiscord(member)
 	_, errMinecraft := GetPlayerByMinecraft(minecraftNickname)

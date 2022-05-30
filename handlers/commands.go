@@ -365,6 +365,8 @@ var Commands = map[string]Command{
 				roleErr = session.GuildMemberRoleAdd(GuildId, member.User.ID, setting.Value)
 			}
 
+			go updateWhitelistMessage(session)
+
 			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
 				Embeds: []*discordgo.MessageEmbed{
 					{
@@ -469,6 +471,8 @@ var Commands = map[string]Command{
 			if roleErr == nil {
 				roleErr = session.GuildMemberRoleRemove(GuildId, member.User.ID, setting.Value)
 			}
+
+			go updateWhitelistMessage(session)
 
 			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
 				Embeds: []*discordgo.MessageEmbed{
@@ -621,6 +625,123 @@ var Commands = map[string]Command{
 			if err != nil {
 				log.Printf("Error sending message: %v", err)
 				return
+			}
+		},
+	},
+	"send-whitelist": {
+		ApplicationCommand: &discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
+			Name:        "send-whitelist",
+			Description: "Send whitelist message",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionChannel,
+					Name:        "channel",
+					Description: "Whitelist channel",
+					Required:    true,
+				},
+			},
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+				err := interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			}
+
+			channel := interactionCreate.ApplicationCommandData().Options[0].ChannelValue(session)
+
+			if channel.Type != discordgo.ChannelTypeGuildText {
+				err := interactionRespondError(session, interactionCreate.Interaction, "Wrong channel type.")
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			}
+
+			players, err := connection.GetPlayers()
+			if err != nil {
+				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured getting players: %v", err))
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			}
+
+			var fields []*discordgo.MessageEmbedField
+			for _, player := range players {
+				fields = append(fields, &discordgo.MessageEmbedField{
+					Name:  player.MinecraftNickname,
+					Value: fmt.Sprintf("<@%v>", player.DiscordId),
+				})
+			}
+
+			message, err := session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
+				Embeds: []*discordgo.MessageEmbed{
+					{
+						Title:       "Whitelist info",
+						Description: "All Minecraft Server Night Pix players",
+						Color:       PrimaryEmbedColor,
+						Fields:      fields,
+					},
+				},
+			})
+			if err != nil {
+				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured sending whitelist: %v", err))
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			}
+
+			err = connection.SetSettingValue("whitelistChannel", channel.ID)
+			if err != nil {
+				err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured: %v", err))
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			}
+			err = connection.SetSettingValue("whitelistMessage", message.ID)
+			if err != nil {
+				err := connection.DeleteSetting("whitelistChannel")
+				if err != nil {
+					log.Printf("Error deleting setting: %v", err)
+				}
+				err = interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured: %v", err))
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+				return
+			}
+
+			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "Whitelist info",
+							Description: "Message sent.",
+							Color:       PrimaryEmbedColor,
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:  "Whitelist channel",
+									Value: channel.ID,
+								},
+								{
+									Name:  "Whitelist message",
+									Value: message.ID,
+								},
+							},
+						},
+					},
+					Flags: 1 << 6,
+				},
+			})
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
 			}
 		},
 	},

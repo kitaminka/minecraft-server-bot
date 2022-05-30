@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/kitaminka/minecraft-server-bot/connection"
+	"log"
 )
 
 func createErrorEmbed(errorMessage string) *discordgo.MessageEmbed {
@@ -33,4 +36,48 @@ func followupErrorMessageCreate(session *discordgo.Session, interaction *discord
 		return nil, err
 	}
 	return message, nil
+}
+
+func updateWhitelistMessage(session *discordgo.Session) {
+	channelSetting, err := connection.GetSetting("whitelistChannel")
+	if err != nil {
+		log.Printf("Error updating whitelist message: %v", err)
+		return
+	}
+	messageSetting, err := connection.GetSetting("whitelistMessage")
+	if err != nil {
+		log.Printf("Error updating whitelist message: %v", err)
+		return
+	}
+
+	players, err := connection.GetPlayers()
+	if err != nil {
+		log.Printf("Error updating whitelist message: %v", err)
+		return
+	}
+
+	var fields []*discordgo.MessageEmbedField
+	for _, player := range players {
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:  player.MinecraftNickname,
+			Value: fmt.Sprintf("<@%v>", player.DiscordId),
+		})
+	}
+
+	_, err = session.ChannelMessageEditComplex(&discordgo.MessageEdit{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title:       "Whitelist info",
+				Description: "All Minecraft Server Night Pix players",
+				Color:       PrimaryEmbedColor,
+				Fields:      fields,
+			},
+		},
+		ID:      messageSetting.Value,
+		Channel: channelSetting.Value,
+	})
+	if err != nil {
+		log.Printf("Error updating whitelist message: %v", err)
+		return
+	}
 }
