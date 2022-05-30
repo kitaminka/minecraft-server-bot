@@ -339,6 +339,7 @@ var Commands = map[string]Command{
 				}
 				return
 			}
+
 			unregisterErr := connection.UnregisterPlayer(player.MinecraftNickname)
 			if unregisterErr != nil {
 				return
@@ -351,16 +352,55 @@ var Commands = map[string]Command{
 			if playerErr != nil {
 				return
 			}
+			setting, roleErr := connection.GetSetting("minecraftRole")
+			if roleErr == nil {
+				roleErr = session.GuildMemberRoleRemove(GuildId, member.User.ID, setting.Value)
+			}
 
-			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Flags: 1 << 6,
+			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
+				Embeds: []*discordgo.MessageEmbed{
+					{
+						Title:       "Player unregistered",
+						Description: "Successfully unregistered player.",
+						Fields: []*discordgo.MessageEmbedField{
+							{
+								Name:   "Discord member",
+								Value:  fmt.Sprintf("<@%v>", member.User.ID),
+								Inline: true,
+							},
+							{
+								Name:   "Minecraft nickname",
+								Value:  player.MinecraftNickname,
+								Inline: true,
+							},
+							{
+								Name:   "Unregister error",
+								Value:  fmt.Sprint(unregisterErr),
+								Inline: true,
+							},
+							{
+								Name:   "Whitelist error",
+								Value:  fmt.Sprint(whitelistErr),
+								Inline: true,
+							},
+							{
+								Name:   "Player error",
+								Value:  fmt.Sprint(playerErr),
+								Inline: true,
+							},
+							{
+								Name:   "Role error",
+								Value:  fmt.Sprint(playerErr),
+								Inline: true,
+							},
+						},
+						Color: PrimaryEmbedColor,
+					},
 				},
+				Flags: 1 << 6,
 			})
 			if err != nil {
 				log.Printf("Error responding to interaction: %v", err)
-				return
 			}
 		},
 	},
