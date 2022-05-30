@@ -99,6 +99,19 @@ var Commands = map[string]Command{
 					Name:        "view",
 					Description: "View all settings",
 				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "delete",
+					Description: "Delete setting",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:        discordgo.ApplicationCommandOptionString,
+							Name:        "name",
+							Description: "Setting name",
+							Required:    true,
+						},
+					},
+				},
 			},
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
@@ -124,6 +137,7 @@ var Commands = map[string]Command{
 					if err != nil {
 						log.Printf("Error responding to interaction: %v", err)
 					}
+					return
 				}
 
 				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -178,6 +192,41 @@ var Commands = map[string]Command{
 								Description: "Full list of settings",
 								Color:       PrimaryEmbedColor,
 								Fields:      fields,
+							},
+						},
+						Flags: 1 << 6,
+					},
+				})
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+			} else if options[0].Name == "delete" {
+				subcommandOptions := options[0].Options
+				settingName := subcommandOptions[0].StringValue()
+
+				err := connection.DeleteSetting(settingName)
+				if err != nil {
+					err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
+					if err != nil {
+						log.Printf("Error responding to interaction: %v", err)
+					}
+					return
+				}
+
+				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Setting deleted",
+								Description: "Setting deleted successfully",
+								Color:       PrimaryEmbedColor,
+								Fields: []*discordgo.MessageEmbedField{
+									{
+										Name:  "Name",
+										Value: settingName,
+									},
+								},
 							},
 						},
 						Flags: 1 << 6,
@@ -414,17 +463,8 @@ var Commands = map[string]Command{
 			}
 
 			unregisterErr := connection.UnregisterPlayer(player.MinecraftNickname)
-			if unregisterErr != nil {
-				return
-			}
 			whitelistErr := connection.RemovePlayerWhitelist(player.MinecraftNickname)
-			if whitelistErr != nil {
-				return
-			}
 			playerErr := connection.DeletePlayer(member)
-			if playerErr != nil {
-				return
-			}
 			setting, roleErr := connection.GetSetting("minecraftRole")
 			if roleErr == nil {
 				roleErr = session.GuildMemberRoleRemove(GuildId, member.User.ID, setting.Value)

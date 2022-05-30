@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -136,6 +137,20 @@ func SetSettingValue(settingName, settingValue string) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+func DeleteSetting(settingName string) error {
+	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
+
+	result, err := collection.DeleteOne(nil, bson.D{{"name", settingName}})
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return errors.New("setting not found")
 	}
 
 	return nil
