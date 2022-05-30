@@ -48,6 +48,21 @@ func UnregisterPlayer(minecraftNickname string) error {
 	}
 	return nil
 }
+func ResetPlayerPassword(minecraftNickname string) (string, error) {
+	password := generatePassword()
+	err := ChangePlayerPassword(minecraftNickname, password)
+	if err != nil {
+		return "", err
+	}
+	return password, nil
+}
+func ChangePlayerPassword(minecraftNickname, newPassword string) error {
+	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin changepassword %v %v", minecraftNickname, newPassword))
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func AddPlayerWhitelist(minecraftNickname string) error {
 	message, err := RconClient.SendCommand(fmt.Sprintf("whitelist add %v", minecraftNickname))
 	if err != nil {
@@ -58,14 +73,6 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 		return err
 	}
 	return nil
-}
-func ResetPlayerPassword(minecraftNickname string) (string, error) {
-	password := generatePassword()
-	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin changepassword %v %v", minecraftNickname, password))
-	if err != nil {
-		return "", err
-	}
-	return password, nil
 }
 func RemovePlayerWhitelist(minecraftNickname string) error {
 	_, err := RconClient.SendCommand(fmt.Sprintf("whitelist remove %v", minecraftNickname))

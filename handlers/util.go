@@ -106,7 +106,7 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Title:       "Password reset",
-				Description: "Successfully reset password",
+				Description: "Successfully reset password.",
 				Color:       PrimaryEmbedColor,
 				Fields: []*discordgo.MessageEmbedField{
 					{
@@ -173,7 +173,8 @@ func updateWhitelistMessage(session *discordgo.Session) {
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
-					Components["reset-password"].MessageComponent,
+					Components["reset_password"].MessageComponent,
+					Components["change_password"].MessageComponent,
 				},
 			},
 		},

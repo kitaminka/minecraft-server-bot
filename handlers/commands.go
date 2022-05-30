@@ -481,10 +481,10 @@ var Commands = map[string]Command{
 			}
 		},
 	},
-	"reset-password": {
+	"reset_password": {
 		ApplicationCommand: &discordgo.ApplicationCommand{
 			Type:        discordgo.ChatApplicationCommand,
-			Name:        "reset-password",
+			Name:        "reset_password",
 			Description: "Reset player password",
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
@@ -544,7 +544,8 @@ var Commands = map[string]Command{
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
-							Components["reset-password"].MessageComponent,
+							Components["reset_password"].MessageComponent,
+							Components["change_password"].MessageComponent,
 						},
 					},
 				},
