@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-var GuildId string
-
 type Command struct {
 	ApplicationCommand *discordgo.ApplicationCommand
 	Handler            func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate)
@@ -685,6 +683,13 @@ var Commands = map[string]Command{
 						Description: "All Minecraft Server Night Pix players",
 						Color:       PrimaryEmbedColor,
 						Fields:      fields,
+					},
+				},
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							Components["reset-password"].MessageComponent,
+						},
 					},
 				},
 			})

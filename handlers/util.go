@@ -73,6 +73,13 @@ func updateWhitelistMessage(session *discordgo.Session) {
 				Fields:      fields,
 			},
 		},
+		Components: []discordgo.MessageComponent{
+			discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					Components["reset-password"].MessageComponent,
+				},
+			},
+		},
 		ID:      messageSetting.Value,
 		Channel: channelSetting.Value,
 	})
