@@ -95,6 +95,34 @@ func GetPlayerByMinecraft(minecraftNickname string) (Player, error) {
 
 	return serverMember, nil
 }
+func ViewSettings() ([]Setting, error) {
+	var settings []Setting
+
+	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
+
+	result, _ := collection.Find(nil, bson.D{})
+
+	err := result.All(nil, &settings)
+	if err != nil {
+		return []Setting{}, err
+	}
+
+	return settings, nil
+}
+func GetSetting(settingName string) (Setting, error) {
+	var setting Setting
+
+	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
+
+	result := collection.FindOne(nil, bson.D{{"name", settingName}})
+
+	err := result.Decode(&setting)
+	if err != nil {
+		return Setting{}, err
+	}
+
+	return setting, nil
+}
 func SetSettingValue(settingName, settingValue string) error {
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
 
@@ -111,18 +139,4 @@ func SetSettingValue(settingName, settingValue string) error {
 	}
 
 	return nil
-}
-func GetSetting(settingName string) (Setting, error) {
-	var setting Setting
-
-	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
-
-	result := collection.FindOne(nil, bson.D{{"name", settingName}})
-
-	err := result.Decode(&setting)
-	if err != nil {
-		return Setting{}, err
-	}
-
-	return setting, nil
 }

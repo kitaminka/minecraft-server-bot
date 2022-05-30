@@ -30,7 +30,6 @@ var Commands = map[string]Command{
 					Flags:   1 << 6,
 				},
 			})
-
 			if err != nil {
 				log.Printf("Error responding to interaction: %v", err)
 			}
@@ -111,8 +110,82 @@ var Commands = map[string]Command{
 				return
 			}
 
-			if interactionCreate.ApplicationCommandData().Options[0].Name == "set" {
-				connection.SetSettingValue(interactionCreate.ApplicationCommandData().Options[0].Options[0].StringValue(), interactionCreate.ApplicationCommandData().Options[0].Options[1].StringValue())
+			options := interactionCreate.ApplicationCommandData().Options
+
+			if options[0].Name == "set" {
+				subcommandOptions := options[0].Options
+
+				settingName := subcommandOptions[0].StringValue()
+				settingValue := subcommandOptions[1].StringValue()
+
+				err := connection.SetSettingValue(settingName, settingValue)
+				if err != nil {
+					err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
+					if err != nil {
+						log.Printf("Error responding to interaction: %v", err)
+					}
+				}
+
+				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Flags: 1 << 6,
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Setting edited",
+								Description: "Setting edited successfully",
+								Color:       PrimaryEmbedColor,
+								Fields: []*discordgo.MessageEmbedField{
+									{
+										Name:  "Name",
+										Value: settingName,
+									},
+									{
+										Name:  "Value",
+										Value: settingValue,
+									},
+								},
+							},
+						},
+					},
+				})
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
+			} else if options[0].Name == "view" {
+				settings, err := connection.ViewSettings()
+				if err != nil {
+					err := interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
+					if err != nil {
+						log.Printf("Error responding to interaction: %v", err)
+					}
+				}
+
+				var fields []*discordgo.MessageEmbedField
+				for _, setting := range settings {
+					fields = append(fields, &discordgo.MessageEmbedField{
+						Name:  setting.Name,
+						Value: setting.Value,
+					})
+				}
+
+				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Flags: 1 << 6,
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Settings",
+								Description: "Full list of settings",
+								Color:       PrimaryEmbedColor,
+								Fields:      fields,
+							},
+						},
+					},
+				})
+				if err != nil {
+					log.Printf("Error responding to interaction: %v", err)
+				}
 			}
 		},
 	},
