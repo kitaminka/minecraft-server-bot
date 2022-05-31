@@ -12,20 +12,29 @@ import (
 
 const passwordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-var RconClient *minecraft.Client
+var (
+	RconAddress  string
+	RconPassword string
+	RconClient   *minecraft.Client
+)
 
 func ConnectRcon(rconAddress, rconPassword string) {
-	rconClient, err := minecraft.NewClient(rconAddress)
+	RconAddress = rconAddress
+	RconPassword = rconPassword
+	rconClient, err := connectRconClient(RconAddress, RconPassword)
 	if err != nil {
 		log.Panicf("Error connecting to RCON: %v", err)
 	}
-
-	err = rconClient.Authenticate(rconPassword)
-	if err != nil {
-		log.Panicf("Error RCON authenticating: %v", err)
-	}
 	log.Print("Successfully connected to RCON")
-
+	RconClient = rconClient
+}
+func ReconnectRcon() {
+	log.Print("Trying to reconnect to RCON")
+	rconClient, err := connectRconClient(RconAddress, RconPassword)
+	if err != nil {
+		log.Panicf("Error reconnecting to RCON: %v", err)
+	}
+	log.Print("Successfully reconnected to RCON")
 	RconClient = rconClient
 }
 func RegisterPlayer(minecraftNickname string) (string, error) {
@@ -34,7 +43,7 @@ func RegisterPlayer(minecraftNickname string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	_, err = RconClient.SendCommand(fmt.Sprintf("nlogin register %v %v", minecraftNickname, password))
+	_, err = sendCommand(fmt.Sprintf("nlogin register %v %v", minecraftNickname, password))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
 		return "", err
@@ -42,7 +51,7 @@ func RegisterPlayer(minecraftNickname string) (string, error) {
 	return password, nil
 }
 func UnregisterPlayer(minecraftNickname string) error {
-	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin unregister %v", minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf("nlogin unregister %v", minecraftNickname))
 	if err != nil {
 		return err
 	}
@@ -57,14 +66,14 @@ func ResetPlayerPassword(minecraftNickname string) (string, error) {
 	return password, nil
 }
 func ChangePlayerPassword(minecraftNickname, newPassword string) error {
-	_, err := RconClient.SendCommand(fmt.Sprintf("nlogin changepassword %v %v", minecraftNickname, newPassword))
+	_, err := sendCommand(fmt.Sprintf("nlogin changepassword %v %v", minecraftNickname, newPassword))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func AddPlayerWhitelist(minecraftNickname string) error {
-	message, err := RconClient.SendCommand(fmt.Sprintf("whitelist add %v", minecraftNickname))
+	message, err := sendCommand(fmt.Sprintf("whitelist add %v", minecraftNickname))
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
 		return err
@@ -75,20 +84,41 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 	return nil
 }
 func RemovePlayerWhitelist(minecraftNickname string) error {
-	_, err := RconClient.SendCommand(fmt.Sprintf("whitelist remove %v", minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf("whitelist remove %v", minecraftNickname))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func GetPlayerWhitelist() ([]string, error) {
-	message, err := RconClient.SendCommand("whitelist list")
+	message, err := sendCommand("whitelist list")
 	if err != nil {
 		log.Printf("Error sending command: %v", err)
 		return nil, err
 	}
 	players := strings.Split(message.Body[33:], ", ")
 	return players, nil
+}
+func connectRconClient(rconAddress, rconPassword string) (*minecraft.Client, error) {
+	rconClient, err := minecraft.NewClient(rconAddress)
+	if err != nil {
+		return &minecraft.Client{}, err
+	}
+	err = rconClient.Authenticate(rconPassword)
+	if err != nil {
+		return &minecraft.Client{}, err
+	}
+	return rconClient, nil
+}
+func sendCommand(command string) (minecraft.Message, error) {
+	message, err := RconClient.SendCommand(command)
+	if err != nil {
+		log.Printf("Error sending command: %v", err)
+		ReconnectRcon()
+		message, err = RconClient.SendCommand(command)
+		return message, err
+	}
+	return message, nil
 }
 func generatePassword() string {
 	var password string
