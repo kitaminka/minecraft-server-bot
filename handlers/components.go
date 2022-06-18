@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
 )
@@ -37,25 +36,7 @@ var Components = map[string]Component{
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseModal,
-				Data: &discordgo.InteractionResponseData{
-					Title:    "Change password",
-					CustomID: fmt.Sprintf("change_password_%v", interactionCreate.Member.User.ID),
-					Components: []discordgo.MessageComponent{
-						discordgo.ActionsRow{
-							Components: []discordgo.MessageComponent{
-								discordgo.TextInput{
-									CustomID:    "new_password",
-									Label:       "Enter your new password",
-									Style:       discordgo.TextInputShort,
-									Placeholder: "New password",
-									Required:    true,
-									MaxLength:   15,
-									MinLength:   3,
-								},
-							},
-						},
-					},
-				},
+				Data: Modals["change_password"].Modal,
 			})
 			if err != nil {
 				log.Printf("Error responding to interaction: %v", err)
