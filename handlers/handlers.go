@@ -41,6 +41,40 @@ var Handlers = []interface{}{
 					interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred changing player password: %v", err))
 				}
 
+				channel, messageErr := session.UserChannelCreate(member.User.ID)
+
+				if messageErr == nil {
+					_, messageErr = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Minecraft Server Night Pix",
+								Description: "Your password has been changed.",
+								Fields: []*discordgo.MessageEmbedField{
+									{
+										Name:   "Discord member",
+										Value:  fmt.Sprintf("<@%v>", member.User.ID),
+										Inline: true,
+									},
+									{
+										Name:   "Minecraft nickname",
+										Value:  player.MinecraftNickname,
+										Inline: true,
+									},
+									{
+										Name:   "Password",
+										Value:  fmt.Sprintf("||%v||", password),
+										Inline: true,
+									},
+								},
+								Color: PrimaryEmbedColor,
+							},
+						},
+					})
+				}
+				if messageErr != nil {
+					log.Printf("Error sending message: %v", err)
+				}
+
 				err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
@@ -63,6 +97,11 @@ var Handlers = []interface{}{
 									{
 										Name:   "Password",
 										Value:  fmt.Sprintf("||%v||", password),
+										Inline: true,
+									},
+									{
+										Name:   "Message error",
+										Value:  fmt.Sprint(messageErr),
 										Inline: true,
 									},
 								},

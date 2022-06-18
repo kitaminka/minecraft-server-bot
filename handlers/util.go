@@ -68,10 +68,10 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 		return
 	}
 
-	channel, err := session.UserChannelCreate(member.User.ID)
+	channel, messageErr := session.UserChannelCreate(member.User.ID)
 
-	if err == nil {
-		_, err = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
+	if messageErr == nil {
+		_, messageErr = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title:       "Minecraft Server Night Pix",
@@ -98,7 +98,7 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 			},
 		})
 	}
-	if err != nil {
+	if messageErr != nil {
 		log.Printf("Error sending message: %v", err)
 	}
 
@@ -122,6 +122,11 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 					{
 						Name:   "Password",
 						Value:  fmt.Sprintf("||%v||", password),
+						Inline: true,
+					},
+					{
+						Name:   "Message error",
+						Value:  fmt.Sprint(messageErr),
 						Inline: true,
 					},
 				},
