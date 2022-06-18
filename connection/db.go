@@ -147,7 +147,7 @@ func SetSettingValue(settingName, settingValue string) error {
 	}
 
 	if replaceResult.ModifiedCount == 0 {
-		_, err := collection.InsertOne(nil, bson.D{{"name", settingName}, {"value", settingValue}})
+		_, err = collection.InsertOne(nil, bson.D{{"name", settingName}, {"value", settingValue}})
 		if err != nil {
 			return err
 		}
