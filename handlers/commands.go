@@ -80,6 +80,20 @@ var Commands = map[string]Command{
 							Name:        "name",
 							Description: "Setting name",
 							Required:    true,
+							Choices: []*discordgo.ApplicationCommandOptionChoice{
+								{
+									Name:  "Minecraft role ID",
+									Value: "minecraftRole",
+								},
+								{
+									Name:  "Whitelist info channel ID",
+									Value: "whitelistChannel",
+								},
+								{
+									Name:  "Whitelist info message ID",
+									Value: "whitelistMessage",
+								},
+							},
 						},
 						{
 							Type:        discordgo.ApplicationCommandOptionString,
@@ -336,7 +350,7 @@ var Commands = map[string]Command{
 
 			go updateWhitelistMessage(session)
 
-			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
+			_, err = session.FollowupMessageCreate(interactionCreate.Interaction, true, &discordgo.WebhookParams{
 				Embeds: []*discordgo.MessageEmbed{
 					{
 						Title:       "Player registered",
@@ -434,7 +448,7 @@ var Commands = map[string]Command{
 
 			go updateWhitelistMessage(session)
 
-			_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
+			_, err = session.FollowupMessageCreate(interactionCreate.Interaction, true, &discordgo.WebhookParams{
 				Embeds: []*discordgo.MessageEmbed{
 					{
 						Title:       "Player unregistered",
@@ -501,7 +515,10 @@ var Commands = map[string]Command{
 					Type:        discordgo.ApplicationCommandOptionChannel,
 					Name:        "channel",
 					Description: "Whitelist channel",
-					Required:    true,
+					ChannelTypes: []discordgo.ChannelType{
+						discordgo.ChannelTypeGuildText,
+					},
+					Required: true,
 				},
 			},
 		},

@@ -29,7 +29,7 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 	}
 }
 func followupErrorMessageCreate(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) {
-	_, err := session.FollowupMessageCreate(session.State.User.ID, interaction, true, &discordgo.WebhookParams{
+	_, err := session.FollowupMessageCreate(interaction, true, &discordgo.WebhookParams{
 		Embeds: []*discordgo.MessageEmbed{
 			createErrorEmbed(errorMessage),
 		},
@@ -102,7 +102,7 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 		log.Printf("Error sending message: %v", err)
 	}
 
-	_, err = session.FollowupMessageCreate(session.State.User.ID, interactionCreate.Interaction, true, &discordgo.WebhookParams{
+	_, err = session.FollowupMessageCreate(interactionCreate.Interaction, true, &discordgo.WebhookParams{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Title:       "Password reset",

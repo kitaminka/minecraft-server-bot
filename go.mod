@@ -3,7 +3,7 @@ module github.com/kitaminka/minecraft-server-bot
 go 1.18
 
 require (
-	github.com/bwmarrin/discordgo v0.24.0
+	github.com/bwmarrin/discordgo v0.25.0
 	github.com/joho/godotenv v1.4.0
 	github.com/willroberts/minecraft-client v1.1.0
 	go.mongodb.org/mongo-driver v1.8.4
