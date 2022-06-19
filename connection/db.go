@@ -22,6 +22,15 @@ type Player struct {
 	DiscordId         string
 	MinecraftNickname string
 }
+
+type SettingName string
+
+const (
+	MinecraftRoleSetting    SettingName = "minecraftRole"
+	WhitelistChannelSetting SettingName = "whitelistChannel"
+	WhitelistMessageSetting SettingName = "whitelistMessage"
+)
+
 type Setting struct {
 	Name  string
 	Value string
@@ -124,7 +133,7 @@ func ViewSettings() ([]Setting, error) {
 
 	return settings, nil
 }
-func GetSetting(settingName string) (Setting, error) {
+func GetSetting(settingName SettingName) (Setting, error) {
 	var setting Setting
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
@@ -138,7 +147,7 @@ func GetSetting(settingName string) (Setting, error) {
 
 	return setting, nil
 }
-func SetSettingValue(settingName, settingValue string) error {
+func SetSettingValue(settingName SettingName, settingValue string) error {
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
 
 	replaceResult, err := collection.ReplaceOne(nil, bson.D{{"name", settingName}}, bson.D{{"name", settingName}, {"value", settingValue}})
@@ -155,7 +164,7 @@ func SetSettingValue(settingName, settingValue string) error {
 
 	return nil
 }
-func DeleteSetting(settingName string) error {
+func DeleteSetting(settingName SettingName) error {
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
 
 	result, err := collection.DeleteOne(nil, bson.D{{"name", settingName}})

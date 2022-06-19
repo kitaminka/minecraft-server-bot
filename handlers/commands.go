@@ -83,15 +83,15 @@ var Commands = map[string]Command{
 							Choices: []*discordgo.ApplicationCommandOptionChoice{
 								{
 									Name:  "Minecraft role ID",
-									Value: "minecraftRole",
+									Value: connection.MinecraftRoleSetting,
 								},
 								{
 									Name:  "Whitelist info channel ID",
-									Value: "whitelistChannel",
+									Value: connection.WhitelistChannelSetting,
 								},
 								{
 									Name:  "Whitelist info message ID",
-									Value: "whitelistMessage",
+									Value: connection.WhitelistMessageSetting,
 								},
 							},
 						},
@@ -137,7 +137,7 @@ var Commands = map[string]Command{
 				settingName := subcommandOptions[0].StringValue()
 				settingValue := subcommandOptions[1].StringValue()
 
-				err := connection.SetSettingValue(settingName, settingValue)
+				err := connection.SetSettingValue(connection.SettingName(settingName), settingValue)
 				if err != nil {
 					interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
 					return
@@ -205,7 +205,7 @@ var Commands = map[string]Command{
 				subcommandOptions := options[0].Options
 				settingName := subcommandOptions[0].StringValue()
 
-				err := connection.DeleteSetting(settingName)
+				err := connection.DeleteSetting(connection.SettingName(settingName))
 				if err != nil {
 					interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
 					return
@@ -343,7 +343,7 @@ var Commands = map[string]Command{
 				})
 			}
 
-			setting, roleErr := connection.GetSetting("minecraftRole")
+			setting, roleErr := connection.GetSetting(connection.MinecraftRoleSetting)
 			if roleErr == nil {
 				roleErr = session.GuildMemberRoleAdd(GuildId, member.User.ID, setting.Value)
 			}
@@ -441,7 +441,7 @@ var Commands = map[string]Command{
 			unregisterErr := connection.UnregisterPlayer(player.MinecraftNickname)
 			whitelistErr := connection.RemovePlayerWhitelist(player.MinecraftNickname)
 			playerErr := connection.DeletePlayer(member)
-			setting, roleErr := connection.GetSetting("minecraftRole")
+			setting, roleErr := connection.GetSetting(connection.MinecraftRoleSetting)
 			if roleErr == nil {
 				roleErr = session.GuildMemberRoleRemove(GuildId, member.User.ID, setting.Value)
 			}
@@ -572,14 +572,14 @@ var Commands = map[string]Command{
 				return
 			}
 
-			err = connection.SetSettingValue("whitelistChannel", channel.ID)
+			err = connection.SetSettingValue(connection.WhitelistChannelSetting, channel.ID)
 			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured: %v", err))
 				return
 			}
-			err = connection.SetSettingValue("whitelistMessage", message.ID)
+			err = connection.SetSettingValue(connection.WhitelistMessageSetting, message.ID)
 			if err != nil {
-				err := connection.DeleteSetting("whitelistChannel")
+				err := connection.DeleteSetting(connection.WhitelistChannelSetting)
 				if err != nil {
 					log.Printf("Error deleting setting: %v", err)
 				}

@@ -141,12 +141,12 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 }
 
 func updateWhitelistMessage(session *discordgo.Session) {
-	channelSetting, err := connection.GetSetting("whitelistChannel")
+	channelSetting, err := connection.GetSetting(connection.WhitelistChannelSetting)
 	if err != nil {
 		log.Printf("Error updating whitelist message: %v", err)
 		return
 	}
-	messageSetting, err := connection.GetSetting("whitelistMessage")
+	messageSetting, err := connection.GetSetting(connection.WhitelistMessageSetting)
 	if err != nil {
 		log.Printf("Error updating whitelist message: %v", err)
 		return
