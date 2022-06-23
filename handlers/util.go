@@ -152,17 +152,25 @@ func updateWhitelistMessage(session *discordgo.Session) {
 		return
 	}
 
-	players, err := connection.GetPlayers()
+	whitelistPlayers, err := connection.GetPlayerWhitelist()
 	if err != nil {
 		log.Printf("Error updating whitelist message: %v", err)
 		return
 	}
 
 	var fields []*discordgo.MessageEmbedField
-	for _, player := range players {
+
+	for _, minecraftNickname := range whitelistPlayers {
+		var discordMessage string
+		player, err := connection.GetPlayerByMinecraft(minecraftNickname)
+		if err == nil {
+			discordMessage = fmt.Sprintf("<@%v>", player.DiscordId)
+		} else {
+			discordMessage = "Player is not linked."
+		}
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:  player.MinecraftNickname,
-			Value: fmt.Sprintf("<@%v>", player.DiscordId),
+			Name:  minecraftNickname,
+			Value: discordMessage,
 		})
 	}
 

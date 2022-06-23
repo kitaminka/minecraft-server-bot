@@ -535,17 +535,25 @@ var Commands = map[string]Command{
 				return
 			}
 
-			players, err := connection.GetPlayers()
+			whitelistPlayers, err := connection.GetPlayerWhitelist()
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured getting players: %v", err))
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured getting player whitelist: %v", err))
 				return
 			}
 
 			var fields []*discordgo.MessageEmbedField
-			for _, player := range players {
+
+			for _, minecraftNickname := range whitelistPlayers {
+				var discordMessage string
+				player, err := connection.GetPlayerByMinecraft(minecraftNickname)
+				if err == nil {
+					discordMessage = fmt.Sprintf("<@%v>", player.DiscordId)
+				} else {
+					discordMessage = "Player is not linked."
+				}
 				fields = append(fields, &discordgo.MessageEmbedField{
-					Name:  player.MinecraftNickname,
-					Value: fmt.Sprintf("<@%v>", player.DiscordId),
+					Name:  minecraftNickname,
+					Value: discordMessage,
 				})
 			}
 
