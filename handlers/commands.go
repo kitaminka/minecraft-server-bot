@@ -501,9 +501,7 @@ var Commands = map[string]Command{
 			Name:        "reset-password",
 			Description: "Reset player password",
 		},
-		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			resetPasswordHandler(session, interactionCreate)
-		},
+		Handler: resetPasswordHandler,
 	},
 	"send-whitelist": {
 		ApplicationCommand: &discordgo.ApplicationCommand{
@@ -535,36 +533,15 @@ var Commands = map[string]Command{
 				return
 			}
 
-			whitelistPlayers, err := connection.GetPlayerWhitelist()
+			embed, err := createWhitelistEmbed()
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occured getting player whitelist: %v", err))
+				log.Printf("Error creating whitelist message: %v", err)
 				return
-			}
-
-			var fields []*discordgo.MessageEmbedField
-
-			for _, minecraftNickname := range whitelistPlayers {
-				var discordMessage string
-				player, err := connection.GetPlayerByMinecraft(minecraftNickname)
-				if err == nil {
-					discordMessage = fmt.Sprintf("<@%v>", player.DiscordId)
-				} else {
-					discordMessage = "Player is not linked."
-				}
-				fields = append(fields, &discordgo.MessageEmbedField{
-					Name:  minecraftNickname,
-					Value: discordMessage,
-				})
 			}
 
 			message, err := session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
 				Embeds: []*discordgo.MessageEmbed{
-					{
-						Title:       "Whitelist info",
-						Description: "All Minecraft Server Night Pix players",
-						Color:       PrimaryEmbedColor,
-						Fields:      fields,
-					},
+					embed,
 				},
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{

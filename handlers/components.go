@@ -20,9 +20,7 @@ var Components = map[string]Component{
 				Name: "🔐",
 			},
 		},
-		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			resetPasswordHandler(session, interactionCreate)
-		},
+		Handler: resetPasswordHandler,
 	},
 	"change_password": {
 		MessageComponent: &discordgo.Button{
