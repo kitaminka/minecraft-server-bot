@@ -81,8 +81,8 @@ func GetPlayerWhitelist() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	players := strings.Split(message.Body[33:], ", ")
-	return players, err
+	playerWhitelist := strings.Split(message.Body[34:], ", ")
+	return playerWhitelist, err
 }
 func connectRconClient(rconAddress, rconPassword string) (*minecraft.Client, error) {
 	rconClient, err := minecraft.NewClient(rconAddress)
