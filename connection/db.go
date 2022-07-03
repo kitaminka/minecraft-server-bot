@@ -119,7 +119,7 @@ func GetPlayerByMinecraft(minecraftNickname string) (Player, error) {
 
 	return serverMember, nil
 }
-func ViewSettings() ([]Setting, error) {
+func GetSettings() ([]Setting, error) {
 	var settings []Setting
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)

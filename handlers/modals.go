@@ -43,7 +43,7 @@ var Modals = map[string]Modal{
 			}
 
 			password := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
-			err = connection.ChangePlayerPassword(player.MinecraftNickname, password)
+			err = connection.ChangeMinecraftPlayerPassword(player.MinecraftNickname, password)
 			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred changing player password: %v", err))
 			}

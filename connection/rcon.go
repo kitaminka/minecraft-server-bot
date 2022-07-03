@@ -37,9 +37,9 @@ func ReconnectRcon() {
 	log.Print("Successfully reconnected to RCON")
 	RconClient = rconClient
 }
-func RegisterPlayer(minecraftNickname string) (string, error) {
+func RegisterMinecraftPlayer(minecraftNickname string) (string, error) {
 	password := generatePassword()
-	err := UnregisterPlayer(minecraftNickname)
+	err := UnregisterMinecraftPlayer(minecraftNickname)
 	if err != nil {
 		return password, err
 	}
@@ -49,16 +49,16 @@ func RegisterPlayer(minecraftNickname string) (string, error) {
 	}
 	return password, err
 }
-func UnregisterPlayer(minecraftNickname string) error {
+func UnregisterMinecraftPlayer(minecraftNickname string) error {
 	_, err := sendCommand(fmt.Sprintf("nlogin unregister %v", minecraftNickname))
 	return err
 }
-func ResetPlayerPassword(minecraftNickname string) (string, error) {
+func ResetMinecraftPlayerPassword(minecraftNickname string) (string, error) {
 	password := generatePassword()
-	err := ChangePlayerPassword(minecraftNickname, password)
+	err := ChangeMinecraftPlayerPassword(minecraftNickname, password)
 	return password, err
 }
-func ChangePlayerPassword(minecraftNickname, newPassword string) error {
+func ChangeMinecraftPlayerPassword(minecraftNickname, newPassword string) error {
 	_, err := sendCommand(fmt.Sprintf("nlogin changepassword %v %v", minecraftNickname, newPassword))
 	return err
 }

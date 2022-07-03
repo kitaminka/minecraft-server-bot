@@ -170,7 +170,7 @@ var Commands = map[string]Command{
 					log.Printf("Error responding to interaction: %v", err)
 				}
 			} else if options[0].Name == "view" {
-				settings, err := connection.ViewSettings()
+				settings, err := connection.GetSettings()
 				if err != nil {
 					interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred: %v", err))
 					return
@@ -282,34 +282,17 @@ var Commands = map[string]Command{
 				return
 			}
 
-			err = connection.CreatePlayer(member, minecraftNickname)
+			password, err := connection.RegisterPlayer(member, minecraftNickname)
 			if err != nil {
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred creating player: %v", err))
-				return
-			}
-
-			err = connection.AddPlayerWhitelist(minecraftNickname)
-			if err != nil {
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred whitelisting player: %v", err))
-				err = connection.DeletePlayer(member)
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registring player: %v", err))
+				err := connection.DeletePlayer(member)
 				if err != nil {
-					log.Printf("Error deleting player: %v", err)
-				}
-				return
-			}
-
-			password, err := connection.RegisterPlayer(minecraftNickname)
-			if err != nil {
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registering player: %v", err))
-				err = connection.DeletePlayer(member)
-				if err != nil {
-					log.Printf("Error deleting player: %v", err)
+					return
 				}
 				err = connection.RemovePlayerWhitelist(minecraftNickname)
 				if err != nil {
-					log.Printf("Error removing player from whitelist: %v", err)
+					return
 				}
-				return
 			}
 
 			channel, messageErr := session.UserChannelCreate(member.User.ID)
@@ -431,16 +414,13 @@ var Commands = map[string]Command{
 				return
 			}
 
-			player, err := connection.GetPlayerByDiscord(member)
+			player, err := connection.UnregisterPlayer(member)
 			if err != nil {
-				log.Printf("Error getting player: %v", err)
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
+				log.Printf("Error unregistring player: %v", err)
+				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred unregistring player: %v", err))
 				return
 			}
 
-			unregisterErr := connection.UnregisterPlayer(player.MinecraftNickname)
-			whitelistErr := connection.RemovePlayerWhitelist(player.MinecraftNickname)
-			playerErr := connection.DeletePlayer(member)
 			setting, roleErr := connection.GetSetting(connection.MinecraftRoleSetting)
 			if roleErr == nil {
 				roleErr = session.GuildMemberRoleRemove(GuildId, member.User.ID, setting.Value)
@@ -465,23 +445,8 @@ var Commands = map[string]Command{
 								Inline: true,
 							},
 							{
-								Name:   "Unregister error",
-								Value:  fmt.Sprint(unregisterErr),
-								Inline: true,
-							},
-							{
-								Name:   "Whitelist error",
-								Value:  fmt.Sprint(whitelistErr),
-								Inline: true,
-							},
-							{
-								Name:   "Player error",
-								Value:  fmt.Sprint(playerErr),
-								Inline: true,
-							},
-							{
 								Name:   "Role error",
-								Value:  fmt.Sprint(playerErr),
+								Value:  fmt.Sprint(roleErr),
 								Inline: true,
 							},
 						},
