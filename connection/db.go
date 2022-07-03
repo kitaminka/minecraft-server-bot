@@ -3,7 +3,6 @@ package connection
 import (
 	"errors"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -60,8 +59,8 @@ func GetPlayers() ([]Player, error) {
 
 	return players, nil
 }
-func CreatePlayer(member *discordgo.Member, minecraftNickname string) error {
-	_, errDiscord := GetPlayerByDiscord(member)
+func CreatePlayer(userId string, minecraftNickname string) error {
+	_, errDiscord := GetPlayerByDiscord(userId)
 	_, errMinecraft := GetPlayerByMinecraft(minecraftNickname)
 
 	if errDiscord == nil {
@@ -72,7 +71,7 @@ func CreatePlayer(member *discordgo.Member, minecraftNickname string) error {
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
 
-	_, err := collection.InsertOne(nil, bson.D{{"discordId", member.User.ID}, {"minecraftNickname", minecraftNickname}})
+	_, err := collection.InsertOne(nil, bson.D{{"discordId", userId}, {"minecraftNickname", minecraftNickname}})
 	if err != nil {
 		log.Printf("Error creating player: %v", err)
 		return err
@@ -80,10 +79,10 @@ func CreatePlayer(member *discordgo.Member, minecraftNickname string) error {
 
 	return nil
 }
-func DeletePlayer(member *discordgo.Member) error {
+func DeletePlayer(userId string) error {
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
 
-	_, err := collection.DeleteOne(nil, bson.D{{"discordId", member.User.ID}})
+	_, err := collection.DeleteOne(nil, bson.D{{"discordId", userId}})
 	if err != nil {
 		log.Printf("Error deleting player: %v", err)
 		return err
@@ -91,12 +90,12 @@ func DeletePlayer(member *discordgo.Member) error {
 
 	return nil
 }
-func GetPlayerByDiscord(member *discordgo.Member) (Player, error) {
+func GetPlayerByDiscord(userId string) (Player, error) {
 	var serverPlayer Player
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
 
-	result := collection.FindOne(nil, bson.D{{"discordId", member.User.ID}})
+	result := collection.FindOne(nil, bson.D{{"discordId", userId}})
 
 	err := result.Decode(&serverPlayer)
 	if err != nil {

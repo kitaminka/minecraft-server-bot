@@ -1,11 +1,7 @@
 package connection
 
-import (
-	"github.com/bwmarrin/discordgo"
-)
-
-func RegisterPlayer(member *discordgo.Member, minecraftNickname string) (string, error) {
-	err := CreatePlayer(member, minecraftNickname)
+func RegisterPlayer(userId string, minecraftNickname string) (string, error) {
+	err := CreatePlayer(userId, minecraftNickname)
 	if err != nil {
 		return "", err
 	}
@@ -18,15 +14,15 @@ func RegisterPlayer(member *discordgo.Member, minecraftNickname string) (string,
 	password, err := RegisterMinecraftPlayer(minecraftNickname)
 	return password, err
 }
-func UnregisterPlayer(member *discordgo.Member) (Player, error) {
-	player, err := GetPlayerByDiscord(member)
+func UnregisterPlayer(userId string) (Player, error) {
+	player, err := GetPlayerByDiscord(userId)
 	if err != nil {
 		return player, err
 	}
 
 	_ = UnregisterMinecraftPlayer(player.MinecraftNickname)
 	_ = RemovePlayerWhitelist(player.MinecraftNickname)
-	_ = DeletePlayer(member)
+	_ = DeletePlayer(userId)
 
 	return player, err
 }

@@ -29,7 +29,7 @@ var Handlers = []interface{}{
 		updateWhitelistMessage(session)
 	},
 	func(session *discordgo.Session, guildMemberRemove *discordgo.GuildMemberRemove) {
-		_, err := connection.UnregisterPlayer(guildMemberRemove.Member)
+		_, err := connection.UnregisterPlayer(guildMemberRemove.User.ID)
 		if err != nil {
 			log.Printf("Error unregistring player: %v", err)
 			return
@@ -55,9 +55,9 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 		return
 	}
 
-	member := interactionCreate.Member
+	user := interactionCreate.Member.User
 
-	player, err := connection.GetPlayerByDiscord(member)
+	player, err := connection.GetPlayerByDiscord(user.ID)
 	if err != nil {
 		log.Printf("Error getting player: %v", err)
 		followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
@@ -71,7 +71,7 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 		return
 	}
 
-	channel, messageErr := session.UserChannelCreate(member.User.ID)
+	channel, messageErr := session.UserChannelCreate(user.ID)
 
 	if messageErr == nil {
 		_, messageErr = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
@@ -82,7 +82,7 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 					Fields: []*discordgo.MessageEmbedField{
 						{
 							Name:   "Discord member",
-							Value:  fmt.Sprintf("<@%v>", member.User.ID),
+							Value:  fmt.Sprintf("<@%v>", user.ID),
 							Inline: true,
 						},
 						{
@@ -114,7 +114,7 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:   "Discord member",
-						Value:  fmt.Sprintf("<@%v>", member.User.ID),
+						Value:  fmt.Sprintf("<@%v>", user.ID),
 						Inline: true,
 					},
 					{

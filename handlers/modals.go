@@ -35,9 +35,9 @@ var Modals = map[string]Modal{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			data := interactionCreate.ModalSubmitData()
-			member := interactionCreate.Member
+			user := interactionCreate.User
 
-			player, err := connection.GetPlayerByDiscord(member)
+			player, err := connection.GetPlayerByDiscord(user.ID)
 			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
 			}
@@ -48,7 +48,7 @@ var Modals = map[string]Modal{
 				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred changing player password: %v", err))
 			}
 
-			channel, messageErr := session.UserChannelCreate(member.User.ID)
+			channel, messageErr := session.UserChannelCreate(user.ID)
 
 			if messageErr == nil {
 				_, messageErr = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
@@ -59,7 +59,7 @@ var Modals = map[string]Modal{
 							Fields: []*discordgo.MessageEmbedField{
 								{
 									Name:   "Discord member",
-									Value:  fmt.Sprintf("<@%v>", member.User.ID),
+									Value:  fmt.Sprintf("<@%v>", user.ID),
 									Inline: true,
 								},
 								{
@@ -93,7 +93,7 @@ var Modals = map[string]Modal{
 							Fields: []*discordgo.MessageEmbedField{
 								{
 									Name:   "Discord member",
-									Value:  fmt.Sprintf("<@%v>", member.User.ID),
+									Value:  fmt.Sprintf("<@%v>", user.ID),
 									Inline: true,
 								},
 								{

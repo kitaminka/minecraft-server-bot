@@ -275,17 +275,12 @@ var Commands = map[string]Command{
 
 			options := interactionCreate.ApplicationCommandData().Options
 			minecraftNickname := options[1].StringValue()
-			member, err := session.GuildMember(GuildId, options[0].UserValue(session).ID)
-			if err != nil {
-				log.Printf("Error getting member %v", err)
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
-				return
-			}
+			user := options[0].UserValue(session)
 
-			password, err := connection.RegisterPlayer(member, minecraftNickname)
+			password, err := connection.RegisterPlayer(options[0].UserValue(session).ID, minecraftNickname)
 			if err != nil {
 				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registring player: %v", err))
-				err := connection.DeletePlayer(member)
+				err := connection.DeletePlayer(user.ID)
 				if err != nil {
 					return
 				}
@@ -295,7 +290,7 @@ var Commands = map[string]Command{
 				}
 			}
 
-			channel, messageErr := session.UserChannelCreate(member.User.ID)
+			channel, messageErr := session.UserChannelCreate(user.ID)
 
 			if messageErr == nil {
 				_, messageErr = session.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{
@@ -306,7 +301,7 @@ var Commands = map[string]Command{
 							Fields: []*discordgo.MessageEmbedField{
 								{
 									Name:   "Discord member",
-									Value:  fmt.Sprintf("<@%v>", member.User.ID),
+									Value:  fmt.Sprintf("<@%v>", user.ID),
 									Inline: true,
 								},
 								{
@@ -328,7 +323,7 @@ var Commands = map[string]Command{
 
 			setting, roleErr := connection.GetSetting(connection.MinecraftRoleSetting)
 			if roleErr == nil {
-				roleErr = session.GuildMemberRoleAdd(GuildId, member.User.ID, setting.Value)
+				roleErr = session.GuildMemberRoleAdd(GuildId, user.ID, setting.Value)
 			}
 
 			go updateWhitelistMessage(session)
@@ -341,7 +336,7 @@ var Commands = map[string]Command{
 						Fields: []*discordgo.MessageEmbedField{
 							{
 								Name:   "Discord member",
-								Value:  fmt.Sprintf("<@%v>", member.User.ID),
+								Value:  fmt.Sprintf("<@%v>", user.ID),
 								Inline: true,
 							},
 							{
@@ -407,14 +402,8 @@ var Commands = map[string]Command{
 			}
 
 			user := interactionCreate.Interaction.ApplicationCommandData().Options[0].UserValue(session)
-			member, err := session.GuildMember(GuildId, user.ID)
-			if err != nil {
-				log.Printf("Error getting member %v", err)
-				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting member: %v", err))
-				return
-			}
 
-			player, err := connection.UnregisterPlayer(member)
+			player, err := connection.UnregisterPlayer(user.ID)
 			if err != nil {
 				log.Printf("Error unregistring player: %v", err)
 				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred unregistring player: %v", err))
@@ -423,7 +412,7 @@ var Commands = map[string]Command{
 
 			setting, roleErr := connection.GetSetting(connection.MinecraftRoleSetting)
 			if roleErr == nil {
-				roleErr = session.GuildMemberRoleRemove(GuildId, member.User.ID, setting.Value)
+				roleErr = session.GuildMemberRoleRemove(GuildId, user.ID, setting.Value)
 			}
 
 			go updateWhitelistMessage(session)
@@ -436,7 +425,7 @@ var Commands = map[string]Command{
 						Fields: []*discordgo.MessageEmbedField{
 							{
 								Name:   "Discord member",
-								Value:  fmt.Sprintf("<@%v>", member.User.ID),
+								Value:  fmt.Sprintf("<@%v>", user.ID),
 								Inline: true,
 							},
 							{
