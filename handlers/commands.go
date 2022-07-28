@@ -554,6 +554,62 @@ var Commands = map[string]Command{
 			}
 		},
 	},
+	"playtime": {
+		ApplicationCommand: &discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
+			Name:        "playtime",
+			Description: "Get player playtime",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionUser,
+					Name:        "member",
+					Description: "Discord server member",
+					Required:    true,
+				},
+			},
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			user := interactionCreate.Interaction.ApplicationCommandData().Options[0].UserValue(session)
+			player, err := connection.GetPlayerByDiscord(user.ID)
+			if err != nil {
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
+				return
+			}
+			playtime, err := connection.GetPlayerPlaytime(player.MinecraftNickname)
+			if err != nil {
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting playtime: %v", err))
+				return
+			}
+			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title: "Playtime",
+							Color: PrimaryEmbedColor,
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:  "Discord member",
+									Value: fmt.Sprintf("<@%v>", user.ID),
+								},
+								{
+									Name:  "Minecraft nickname",
+									Value: player.MinecraftNickname,
+								},
+								{
+									Name:  "Playtime",
+									Value: playtime,
+								},
+							},
+						},
+					},
+				},
+			})
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
+			}
+		},
+	},
 }
 
 func CreateApplicationCommands(session *discordgo.Session, guildId string) {

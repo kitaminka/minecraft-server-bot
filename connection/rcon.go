@@ -84,6 +84,10 @@ func GetPlayerWhitelist() ([]string, error) {
 	playerWhitelist := strings.Split(message.Body[34:], ", ")
 	return playerWhitelist, err
 }
+func GetPlayerPlaytime(minecraftNickname string) (string, error) {
+	message, err := sendCommand(fmt.Sprintf("playtime %v", minecraftNickname))
+	return message.Body[23+len(minecraftNickname):], err
+}
 func connectRconClient(rconAddress, rconPassword string) (*minecraft.Client, error) {
 	rconClient, err := minecraft.NewClient(rconAddress)
 	if err != nil {
