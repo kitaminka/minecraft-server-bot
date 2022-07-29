@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/minecraft-server-bot/connection"
 	"log"
+	"strconv"
+	"strings"
 )
 
 // Error messages
@@ -47,28 +48,39 @@ func createWhitelistEmbed() (*discordgo.MessageEmbed, error) {
 	if err != nil {
 		return &discordgo.MessageEmbed{}, err
 	}
+	whitelistPlayerCount, err := connection.GetWhitelistPlayerCount()
+	if err != nil {
+		return &discordgo.MessageEmbed{}, err
+	}
+	playerCount, err := connection.GetPlayerCount()
+	if err != nil {
+		return &discordgo.MessageEmbed{}, err
+	}
 
-	var fields []*discordgo.MessageEmbedField
-
-	for _, minecraftNickname := range whitelistPlayers {
-		var discordMessage string
-		player, err := connection.GetPlayerByMinecraft(minecraftNickname)
-		if err == nil {
-			discordMessage = fmt.Sprintf("<@%v>", player.DiscordId)
-		} else {
-			discordMessage = "Player is not linked."
-		}
-		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:  minecraftNickname,
-			Value: discordMessage,
-		})
+	var whitelistPlayerString string
+	if len(strings.Join(whitelistPlayers, ", ")) <= 1021 {
+		whitelistPlayerString = strings.Join(whitelistPlayers, ", ")
+	} else {
+		whitelistPlayerString = strings.Join(whitelistPlayers, ", ")[:1021] + "..."
 	}
 
 	embed := &discordgo.MessageEmbed{
-		Title:       "Whitelist info",
-		Description: "All Minecraft Server Night Pix players",
-		Color:       PrimaryEmbedColor,
-		Fields:      fields,
+		Title: "Whitelist info",
+		Color: PrimaryEmbedColor,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:  "Total whitelist player count",
+				Value: strconv.Itoa(whitelistPlayerCount),
+			},
+			{
+				Name:  "Registered player count",
+				Value: strconv.Itoa(playerCount),
+			},
+			{
+				Name:  "Whitelist players",
+				Value: whitelistPlayerString,
+			},
+		},
 	}
 
 	return embed, err
@@ -99,6 +111,7 @@ func updateWhitelistMessage(session *discordgo.Session) {
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
+					Components["apply_for_whitelist"].MessageComponent,
 					Components["reset_password"].MessageComponent,
 					Components["change_password"].MessageComponent,
 				},

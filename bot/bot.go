@@ -28,6 +28,7 @@ func StartBot(token, guildId string) {
 	}
 
 	handlers.CreateApplicationCommands(session, guildId)
+	log.Println("Bot is now running. Press CTRL-C to exit.")
 
 	defer session.Close()
 

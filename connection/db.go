@@ -28,6 +28,7 @@ const (
 	MinecraftRoleSetting    SettingName = "minecraftRole"
 	WhitelistChannelSetting SettingName = "whitelistChannel"
 	WhitelistMessageSetting SettingName = "whitelistMessage"
+	ApplicationCategory     SettingName = "applicationCategory"
 )
 
 type Setting struct {
@@ -49,15 +50,10 @@ func GetPlayers() ([]Player, error) {
 	var players []Player
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
-
 	result, _ := collection.Find(nil, bson.D{})
-
 	err := result.All(nil, &players)
-	if err != nil {
-		return []Player{}, err
-	}
 
-	return players, nil
+	return players, err
 }
 func CreatePlayer(userId string, minecraftNickname string) error {
 	_, errDiscord := GetPlayerByDiscord(userId)
@@ -94,29 +90,25 @@ func GetPlayerByDiscord(userId string) (Player, error) {
 	var serverPlayer Player
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
-
 	result := collection.FindOne(nil, bson.D{{"discordId", userId}})
-
 	err := result.Decode(&serverPlayer)
-	if err != nil {
-		return Player{}, err
-	}
 
-	return serverPlayer, nil
+	return serverPlayer, err
 }
 func GetPlayerByMinecraft(minecraftNickname string) (Player, error) {
 	var serverMember Player
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
-
 	result := collection.FindOne(nil, bson.D{{"minecraftNickname", minecraftNickname}})
-
 	err := result.Decode(&serverMember)
-	if err != nil {
-		return Player{}, err
-	}
 
-	return serverMember, nil
+	return serverMember, err
+}
+func GetPlayerCount() (int, error) {
+	collection := MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
+	count, err := collection.CountDocuments(nil, bson.D{})
+
+	return int(count), err
 }
 func GetSettings() ([]Setting, error) {
 	var settings []Setting
@@ -126,25 +118,17 @@ func GetSettings() ([]Setting, error) {
 	result, _ := collection.Find(nil, bson.D{})
 
 	err := result.All(nil, &settings)
-	if err != nil {
-		return []Setting{}, err
-	}
 
-	return settings, nil
+	return settings, err
 }
 func GetSetting(settingName SettingName) (Setting, error) {
 	var setting Setting
 
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
-
 	result := collection.FindOne(nil, bson.D{{"name", settingName}})
-
 	err := result.Decode(&setting)
-	if err != nil {
-		return Setting{}, err
-	}
 
-	return setting, nil
+	return setting, err
 }
 func SetSettingValue(settingName SettingName, settingValue string) error {
 	collection := MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)

@@ -123,4 +123,28 @@ var Modals = map[string]Modal{
 			}
 		},
 	},
+	"apply_for_whitelist": {
+		Modal: &discordgo.InteractionResponseData{
+			Title:    "Apply for whitelist",
+			CustomID: "apply_for_whitelist",
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    "minecraft_nickname",
+							Label:       "Enter your Minecraft nickname",
+							Style:       discordgo.TextInputShort,
+							Placeholder: "Minecraft nickname",
+							Required:    true,
+							MaxLength:   16,
+							MinLength:   3,
+						},
+					},
+				},
+			},
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			// TODO Create modal handler
+		},
+	},
 }
