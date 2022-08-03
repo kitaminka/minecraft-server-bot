@@ -111,7 +111,6 @@ func updateWhitelistMessage(session *discordgo.Session) {
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
-					Components["apply_for_whitelist"].MessageComponent,
 					Components["reset_password"].MessageComponent,
 					Components["change_password"].MessageComponent,
 				},

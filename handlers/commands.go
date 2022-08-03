@@ -504,7 +504,6 @@ var Commands = map[string]Command{
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
-							Components["apply_for_whitelist"].MessageComponent,
 							Components["reset_password"].MessageComponent,
 							Components["change_password"].MessageComponent,
 						},

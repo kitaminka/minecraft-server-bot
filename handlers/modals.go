@@ -35,7 +35,7 @@ var Modals = map[string]Modal{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			data := interactionCreate.ModalSubmitData()
-			user := interactionCreate.User
+			user := interactionCreate.Member.User
 
 			player, err := connection.GetPlayerByDiscord(user.ID)
 			if err != nil {
