@@ -73,8 +73,8 @@ func createWhitelistEmbed() (*discordgo.MessageEmbed, error) {
 				Value: strconv.Itoa(whitelistPlayerCount),
 			},
 			{
-				Name:  "Registered player count",
-				Value: strconv.Itoa(playerCount),
+				Name:  "Unregistered player count",
+				Value: strconv.Itoa(whitelistPlayerCount - playerCount),
 			},
 			{
 				Name:  "Whitelist players",
