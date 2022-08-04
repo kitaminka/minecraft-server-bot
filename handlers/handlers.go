@@ -34,6 +34,7 @@ var Handlers = []interface{}{
 			log.Printf("Error unregistring player: %v", err)
 			return
 		}
+		updateWhitelistMessage(session)
 	},
 }
 
