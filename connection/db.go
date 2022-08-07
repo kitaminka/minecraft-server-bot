@@ -25,10 +25,11 @@ type Player struct {
 type SettingName string
 
 const (
-	MinecraftRoleSetting    SettingName = "minecraftRole"
-	WhitelistChannelSetting SettingName = "whitelistChannel"
-	WhitelistMessageSetting SettingName = "whitelistMessage"
-	ApplicationCategory     SettingName = "applicationCategory"
+	MinecraftRoleSetting       SettingName = "minecraftRole"
+	WhitelistChannelSetting    SettingName = "whitelistChannel"
+	WhitelistMessageSetting    SettingName = "whitelistMessage"
+	ApplicationCategorySetting SettingName = "applicationCategory"
+	CuratorRoleSetting         SettingName = "curatorRole"
 )
 
 type Setting struct {

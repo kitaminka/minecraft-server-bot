@@ -95,7 +95,11 @@ var Commands = map[string]Command{
 								},
 								{
 									Name:  "Application category ID",
-									Value: connection.ApplicationCategory,
+									Value: connection.ApplicationCategorySetting,
+								},
+								{
+									Name:  "Curator role ID",
+									Value: connection.CuratorRoleSetting,
 								},
 							},
 						},
@@ -261,12 +265,23 @@ var Commands = map[string]Command{
 			},
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+			curatorRoleSetting, err := connection.GetSetting(connection.CuratorRoleSetting)
+			if err != nil {
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting curator role: %v", err))
+				return
+			}
+			isCurator := false
+			for _, role := range interactionCreate.Member.Roles {
+				if role == curatorRoleSetting.Value {
+					isCurator = true
+				}
+			}
+			if !isCurator {
 				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
-			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Flags: 1 << 6,
@@ -389,12 +404,23 @@ var Commands = map[string]Command{
 			},
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+			curatorRoleSetting, err := connection.GetSetting(connection.CuratorRoleSetting)
+			if err != nil {
+				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting curator role: %v", err))
+				return
+			}
+			isCurator := false
+			for _, role := range interactionCreate.Member.Roles {
+				if role == curatorRoleSetting.Value {
+					isCurator = true
+				}
+			}
+			if !isCurator {
 				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
-			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Flags: 1 << 6,
