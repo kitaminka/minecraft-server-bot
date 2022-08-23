@@ -640,6 +640,24 @@ var Commands = map[string]Command{
 			}
 		},
 	},
+	"profile": {
+		ApplicationCommand: &discordgo.ApplicationCommand{
+			Type: discordgo.UserApplicationCommand,
+			Name: "profile",
+		},
+		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf("<@%v>", interactionCreate.ApplicationCommandData().TargetID),
+					Flags:   1 << 6,
+				},
+			})
+			if err != nil {
+				log.Printf("Error responding to interaction: %v", err)
+			}
+		},
+	},
 }
 
 func CreateApplicationCommands(session *discordgo.Session, guildId string) {
