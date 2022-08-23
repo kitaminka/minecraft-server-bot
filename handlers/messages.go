@@ -57,11 +57,9 @@ func createWhitelistEmbed() (*discordgo.MessageEmbed, error) {
 		return &discordgo.MessageEmbed{}, err
 	}
 
-	var whitelistPlayerString string
-	if len(strings.Join(whitelistPlayers, ", ")) <= 1021 {
-		whitelistPlayerString = strings.Join(whitelistPlayers, ", ")
-	} else {
-		whitelistPlayerString = strings.Join(whitelistPlayers, ", ")[:1021] + "..."
+	var whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `") + "`"
+	if len(whitelistPlayerString) > 1019 {
+		whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `")[:1021] + "`..."
 	}
 
 	embed := &discordgo.MessageEmbed{
