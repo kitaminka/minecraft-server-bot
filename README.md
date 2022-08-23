@@ -1,8 +1,10 @@
 # minecraft-server-bot
-🔐**Discord bot** for managing a whitelist and authorization system on Minecraft server
+🔐**Discord bot** for managing a whitelist and authorization system on Minecraft server.
+___
 ### Required plugins
 - **NLogin**
 - **EssentialsX**
+___
 ### Installation
 - Clone the repository:
 ```bash
