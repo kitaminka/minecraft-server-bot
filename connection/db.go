@@ -2,7 +2,6 @@ package connection
 
 import (
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -17,13 +16,14 @@ const (
 	WhitelistChannelSetting    SettingName = "whitelistChannel"
 	WhitelistMessageSetting    SettingName = "whitelistMessage"
 	ApplicationCategorySetting SettingName = "applicationCategory"
-	CuratorRoleSetting         SettingName = "curatorRole"
 )
 
 var (
-	MongoClient        *mongo.Client
-	PlayerCollection   *mongo.Collection
-	SettingsCollection *mongo.Collection
+	MongoClient              *mongo.Client
+	PlayerCollection         *mongo.Collection
+	SettingsCollection       *mongo.Collection
+	PlayerAlreadyExistsError = errors.New("player already exists")
+	SettingNotFoundError     = errors.New("setting not found")
 )
 
 type Player struct {
@@ -50,22 +50,14 @@ func ConnectMongo(mongoUri string) {
 	PlayerCollection = MongoClient.Database(MongoDatabase).Collection(MongoPlayerCollection)
 	SettingsCollection = MongoClient.Database(MongoDatabase).Collection(MongoSettingsCollection)
 }
-func GetPlayers() ([]Player, error) {
-	var players []Player
-
-	result, _ := PlayerCollection.Find(nil, bson.D{})
-	err := result.All(nil, &players)
-
-	return players, err
-}
 func CreatePlayer(userId string, minecraftNickname string) error {
 	_, errDiscord := GetPlayerByDiscord(userId)
 	_, errMinecraft := GetPlayerByMinecraft(minecraftNickname)
 
 	if errDiscord == nil {
-		return fmt.Errorf("player already exists")
+		return PlayerAlreadyExistsError
 	} else if errMinecraft == nil {
-		return fmt.Errorf("player already exists")
+		return PlayerAlreadyExistsError
 	}
 
 	_, err := PlayerCollection.InsertOne(nil, bson.D{{"discordId", userId}, {"minecraftNickname", minecraftNickname}})
@@ -145,7 +137,7 @@ func DeleteSetting(settingName SettingName) error {
 	}
 
 	if result.DeletedCount == 0 {
-		return errors.New("setting not found")
+		return SettingNotFoundError
 	}
 
 	return nil

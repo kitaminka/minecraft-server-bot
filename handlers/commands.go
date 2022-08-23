@@ -97,10 +97,6 @@ var Commands = map[string]Command{
 									Name:  "Application category ID",
 									Value: connection.ApplicationCategorySetting,
 								},
-								{
-									Name:  "Curator role ID",
-									Value: connection.CuratorRoleSetting,
-								},
 							},
 						},
 						{
@@ -265,23 +261,12 @@ var Commands = map[string]Command{
 			},
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			curatorRoleSetting, err := connection.GetSetting(connection.CuratorRoleSetting)
-			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting curator role: %v", err))
-				return
-			}
-			isCurator := false
-			for _, role := range interactionCreate.Member.Roles {
-				if role == curatorRoleSetting.Value {
-					isCurator = true
-				}
-			}
-			if !isCurator {
+			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
-			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Flags: 1 << 6,
@@ -297,16 +282,14 @@ var Commands = map[string]Command{
 			user := options[0].UserValue(session)
 
 			password, err := connection.RegisterPlayer(options[0].UserValue(session).ID, minecraftNickname)
-			if err != nil {
+			if err == connection.PlayerAlreadyExistsError {
+				followupErrorMessageCreate(session, interactionCreate.Interaction, "Player already exists")
+				return
+			} else if err != nil {
 				followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registring player: %v", err))
-				err := connection.DeletePlayer(user.ID)
-				if err != nil {
-					return
-				}
-				err = connection.RemovePlayerWhitelist(minecraftNickname)
-				if err != nil {
-					return
-				}
+				connection.DeletePlayer(user.ID)
+				connection.RemovePlayerWhitelist(minecraftNickname)
+				return
 			}
 
 			channel, messageErr := session.UserChannelCreate(user.ID)
@@ -404,23 +387,12 @@ var Commands = map[string]Command{
 			},
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			curatorRoleSetting, err := connection.GetSetting(connection.CuratorRoleSetting)
-			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting curator role: %v", err))
-				return
-			}
-			isCurator := false
-			for _, role := range interactionCreate.Member.Roles {
-				if role == curatorRoleSetting.Value {
-					isCurator = true
-				}
-			}
-			if !isCurator {
+			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
 
-			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			err := session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Flags: 1 << 6,
