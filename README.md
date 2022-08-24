@@ -1,5 +1,5 @@
 # minecraft-server-bot
-🔐**Discord bot** for managing a whitelist and authorization system on Minecraft server.
+**Discord bot** for managing a whitelist and authorization system on Minecraft server.
 ___
 ### Required plugins
 - **NLogin**
@@ -15,7 +15,7 @@ git clone https://github.com/kitaminka/minecraft-server-bot.git
 ```bash
 go run main.go
 ```
-- Add bot to your server.
+- Add bot to your Discord server.
 - Using **/send-whitelist** command create whitelist info message.
 - Using **/settings set** command set other bot settings.
 ___
