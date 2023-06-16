@@ -23,7 +23,7 @@ func init() {
 	}
 
 	Token = os.Getenv("DISCORD_TOKEN")
-	MongoUri = os.Getenv("MONGO_URI")
+	MongoUri = os.Getenv("MONGODB_URI")
 	RconAddress = os.Getenv("RCON_ADDRESS")
 	RconPassword = os.Getenv("RCON_PASSWORD")
 	GuildId = os.Getenv("GUILD_ID")

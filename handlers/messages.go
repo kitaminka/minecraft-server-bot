@@ -48,18 +48,20 @@ func createWhitelistEmbed() (*discordgo.MessageEmbed, error) {
 	if err != nil {
 		return &discordgo.MessageEmbed{}, err
 	}
-	whitelistPlayerCount, err := connection.GetWhitelistPlayerCount()
-	if err != nil {
-		return &discordgo.MessageEmbed{}, err
-	}
+	whitelistPlayerCount := len(whitelistPlayers)
 	playerCount, err := connection.GetPlayerCount()
 	if err != nil {
 		return &discordgo.MessageEmbed{}, err
 	}
 
-	var whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `") + "`"
-	if len(whitelistPlayerString) > 1019 {
-		whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `")[:1021] + "`..."
+	var whitelistPlayerString string
+	if whitelistPlayerCount != 0 {
+		whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `") + "`"
+		if len(whitelistPlayerString) > 1019 {
+			whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `")[:1021] + "`..."
+		}
+	} else {
+		whitelistPlayerString = "The whitelist is empty."
 	}
 
 	embed := &discordgo.MessageEmbed{

@@ -6,7 +6,6 @@ import (
 	"github.com/willroberts/minecraft-client"
 	"log"
 	"math/big"
-	"strconv"
 	"strings"
 )
 
@@ -80,17 +79,11 @@ func GetPlayerWhitelist() ([]string, error) {
 	message, err := sendCommand("whitelist list")
 	if err != nil {
 		return nil, err
+	} else if len(message.Body) <= 34 {
+		return []string{}, err
 	}
 	playerWhitelist := strings.Split(message.Body[34:], ", ")
 	return playerWhitelist, err
-}
-func GetWhitelistPlayerCount() (int, error) {
-	message, err := sendCommand("whitelist list")
-	if err != nil {
-		return 0, err
-	}
-	count, err := strconv.Atoi(strings.Split(message.Body, " ")[2])
-	return count, err
 }
 func GetPlayerPlaytime(minecraftNickname string) (string, error) {
 	message, err := sendCommand(fmt.Sprintf("playtime %v", minecraftNickname))
