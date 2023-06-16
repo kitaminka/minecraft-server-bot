@@ -82,7 +82,8 @@ func GetPlayerWhitelist() ([]string, error) {
 	} else if len(message.Body) <= 34 {
 		return []string{}, err
 	}
-	playerWhitelist := strings.Split(message.Body[34:], ", ")
+	// TODO check if this works with empty whitelist
+	playerWhitelist := strings.Split(strings.Split(message.Body, "whitelisted players: ")[1], ", ")
 	return playerWhitelist, err
 }
 func GetPlayerPlaytime(minecraftNickname string) (string, error) {
