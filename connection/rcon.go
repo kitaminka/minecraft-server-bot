@@ -2,7 +2,6 @@ package connection
 
 import (
 	"crypto/rand"
-	"errors"
 	"fmt"
 	"github.com/willroberts/minecraft-client"
 	"log"
@@ -68,7 +67,7 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 	if err != nil {
 		return err
 	} else if message.Body == "Player is already whitelisted" {
-		err = errors.New("player already exists")
+		err = PlayerAlreadyExistsError
 		return err
 	}
 	return err

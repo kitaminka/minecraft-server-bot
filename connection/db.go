@@ -9,13 +9,12 @@ import (
 )
 
 const (
-	MongoDatabase                          = "minecraft-server-bot"
-	MongoPlayerCollection                  = "players"
-	MongoSettingsCollection                = "settings"
-	MinecraftRoleSetting       SettingName = "minecraftRole"
-	WhitelistChannelSetting    SettingName = "whitelistChannel"
-	WhitelistMessageSetting    SettingName = "whitelistMessage"
-	ApplicationCategorySetting SettingName = "applicationCategory"
+	MongoDatabase                       = "minecraft-server-bot"
+	MongoPlayerCollection               = "players"
+	MongoSettingsCollection             = "settings"
+	MinecraftRoleSetting    SettingName = "minecraftRole"
+	WhitelistChannelSetting SettingName = "whitelistChannel"
+	WhitelistMessageSetting SettingName = "whitelistMessage"
 )
 
 var (

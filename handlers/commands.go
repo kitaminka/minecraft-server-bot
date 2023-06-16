@@ -93,10 +93,6 @@ var Commands = map[string]Command{
 									Name:  "Whitelist info message ID",
 									Value: connection.WhitelistMessageSetting,
 								},
-								{
-									Name:  "Application category ID",
-									Value: connection.ApplicationCategorySetting,
-								},
 							},
 						},
 						{
