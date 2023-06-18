@@ -40,10 +40,21 @@ var Commands = map[string]Command{
 			Description: "Get player whitelist",
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			players, err := connection.GetPlayerWhitelist()
+			whitelistPlayers, err := connection.GetPlayerWhitelist()
 			if err != nil {
-				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting whitelist: %v", err))
+				interactionRespondError(session, interactionCreate.Interaction, "Failed to get player whitelist")
 				return
+			}
+			whitelistPlayerCount := len(whitelistPlayers)
+
+			var whitelistPlayerString string
+			if whitelistPlayerCount != 0 {
+				whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `") + "`"
+				if len(whitelistPlayerString) > 1019 {
+					whitelistPlayerString = "`" + strings.Join(whitelistPlayers, "`, `")[:1021] + "`..."
+				}
+			} else {
+				whitelistPlayerString = "The whitelist is empty."
 			}
 
 			err = session.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -52,7 +63,7 @@ var Commands = map[string]Command{
 					Embeds: []*discordgo.MessageEmbed{
 						{
 							Title:       "Whitelist",
-							Description: fmt.Sprintf("Player nicknames: **%v**", strings.Join(players, ", ")),
+							Description: whitelistPlayerString,
 							Color:       PrimaryEmbedColor,
 						},
 					},

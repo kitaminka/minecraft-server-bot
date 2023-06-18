@@ -62,7 +62,7 @@ func ChangeMinecraftPlayerPassword(minecraftNickname, newPassword string) error 
 	return err
 }
 func AddPlayerWhitelist(minecraftNickname string) error {
-	message, err := sendCommand(fmt.Sprintf("whitelist add %v", minecraftNickname))
+	message, err := sendCommand(fmt.Sprintf("easywl add %v", minecraftNickname))
 	if err != nil {
 		return err
 	} else if message.Body == "Player is already whitelisted" {
@@ -72,18 +72,19 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 	return err
 }
 func RemovePlayerWhitelist(minecraftNickname string) error {
-	_, err := sendCommand(fmt.Sprintf("whitelist remove %v", minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf("easywl remove %v", minecraftNickname))
 	return err
 }
 func GetPlayerWhitelist() ([]string, error) {
-	message, err := sendCommand("whitelist list")
+	message, err := sendCommand("easywl list")
 	if err != nil {
 		return nil, err
 	} else if len(message.Body) <= 34 {
 		return []string{}, err
 	}
-	// TODO check if this works with empty whitelist
-	playerWhitelist := strings.Split(strings.Split(message.Body, "whitelisted players: ")[1], ", ")
+	playerWhitelist := strings.Split(strings.ReplaceAll(strings.ReplaceAll(strings.Replace(message.Body, "§a§lWhitelisted:", "", 1), "§7", ""), "\n", ""), "§e§l, ")
+	playerWhitelist = playerWhitelist[1 : len(playerWhitelist)-1]
+	fmt.Println(playerWhitelist)
 	return playerWhitelist, err
 }
 func GetPlayerPlaytime(minecraftNickname string) (string, error) {
