@@ -84,7 +84,6 @@ func GetPlayerWhitelist() ([]string, error) {
 	}
 	playerWhitelist := strings.Split(strings.ReplaceAll(strings.ReplaceAll(strings.Replace(message.Body, "§a§lWhitelisted:", "", 1), "§7", ""), "\n", ""), "§e§l, ")
 	playerWhitelist = playerWhitelist[1 : len(playerWhitelist)-1]
-	fmt.Println(playerWhitelist)
 	return playerWhitelist, err
 }
 func GetPlayerPlaytime(minecraftNickname string) (string, error) {
