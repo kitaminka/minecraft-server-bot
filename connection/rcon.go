@@ -42,14 +42,14 @@ func RegisterMinecraftPlayer(minecraftNickname string) (string, error) {
 	if err != nil {
 		return password, err
 	}
-	_, err = sendCommand(fmt.Sprintf("nlogin register %v %v", minecraftNickname, password))
+	_, err = sendCommand(fmt.Sprintf("openlogin:register %v %v", minecraftNickname, password))
 	if err != nil {
 		return password, err
 	}
 	return password, err
 }
 func UnregisterMinecraftPlayer(minecraftNickname string) error {
-	_, err := sendCommand(fmt.Sprintf("nlogin unregister %v", minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf("openlogin:unregister %v", minecraftNickname))
 	return err
 }
 func ResetMinecraftPlayerPassword(minecraftNickname string) (string, error) {
@@ -58,7 +58,7 @@ func ResetMinecraftPlayerPassword(minecraftNickname string) (string, error) {
 	return password, err
 }
 func ChangeMinecraftPlayerPassword(minecraftNickname, newPassword string) error {
-	_, err := sendCommand(fmt.Sprintf("nlogin changepassword %v %v", minecraftNickname, newPassword))
+	_, err := sendCommand(fmt.Sprintf("openlogin:changepassword %v %v", minecraftNickname, newPassword))
 	return err
 }
 func AddPlayerWhitelist(minecraftNickname string) error {
