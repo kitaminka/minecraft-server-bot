@@ -268,7 +268,7 @@ var Commands = map[string]Command{
 			},
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+			if interactionCreate.Member.Permissions&discordgo.PermissionManageServer == 0 {
 				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
@@ -394,7 +394,7 @@ var Commands = map[string]Command{
 			},
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-			if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
+			if interactionCreate.Member.Permissions&discordgo.PermissionManageServer == 0 {
 				interactionRespondError(session, interactionCreate.Interaction, "Sorry, you don't have permission.")
 				return
 			}
