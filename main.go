@@ -31,6 +31,7 @@ func init() {
 	log.Print("Successfully loaded .env file")
 }
 func main() {
+	connection.ImportConfiguration()
 	connection.ConnectMongo(MongoUri)
 	connection.ConnectRcon(RconAddress, RconPassword)
 	bot.StartBot(Token, GuildId)

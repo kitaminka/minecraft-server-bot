@@ -1,0 +1,11 @@
+{
+  "commands": {
+    "register": "openlogin:register %v %v",
+    "unregister": "openlogin:unregister %v",
+    "changePassword": "openlogin:changepassword %v %v",
+    "addWhitelist": "easywl add %v",
+    "removeWhitelist": "easywl remove %v",
+    "getWhitelist": "easywl list",
+    "playtime": "playtime %v"
+  }
+}

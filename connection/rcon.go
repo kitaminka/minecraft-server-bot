@@ -42,14 +42,14 @@ func RegisterMinecraftPlayer(minecraftNickname string) (string, error) {
 	if err != nil {
 		return password, err
 	}
-	_, err = sendCommand(fmt.Sprintf("openlogin:register %v %v", minecraftNickname, password))
+	_, err = sendCommand(fmt.Sprintf(Config.Commands.Register, minecraftNickname, password))
 	if err != nil {
 		return password, err
 	}
 	return password, err
 }
 func UnregisterMinecraftPlayer(minecraftNickname string) error {
-	_, err := sendCommand(fmt.Sprintf("openlogin:unregister %v", minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf(Config.Commands.Unregister, minecraftNickname))
 	return err
 }
 func ResetMinecraftPlayerPassword(minecraftNickname string) (string, error) {
@@ -58,11 +58,11 @@ func ResetMinecraftPlayerPassword(minecraftNickname string) (string, error) {
 	return password, err
 }
 func ChangeMinecraftPlayerPassword(minecraftNickname, newPassword string) error {
-	_, err := sendCommand(fmt.Sprintf("openlogin:changepassword %v %v", minecraftNickname, newPassword))
+	_, err := sendCommand(fmt.Sprintf(Config.Commands.ChangePassword, minecraftNickname, newPassword))
 	return err
 }
 func AddPlayerWhitelist(minecraftNickname string) error {
-	message, err := sendCommand(fmt.Sprintf("easywl add %v", minecraftNickname))
+	message, err := sendCommand(fmt.Sprintf(Config.Commands.AddWhitelist, minecraftNickname))
 	if err != nil {
 		return err
 	} else if message.Body == "Player is already whitelisted" {
@@ -72,11 +72,11 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 	return err
 }
 func RemovePlayerWhitelist(minecraftNickname string) error {
-	_, err := sendCommand(fmt.Sprintf("easywl remove %v", minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf(Config.Commands.RemoveWhitelist, minecraftNickname))
 	return err
 }
 func GetPlayerWhitelist() ([]string, error) {
-	message, err := sendCommand("easywl list")
+	message, err := sendCommand(Config.Commands.GetWhitelist)
 	if err != nil {
 		return nil, err
 	} else if len(message.Body) <= 34 {
@@ -87,7 +87,7 @@ func GetPlayerWhitelist() ([]string, error) {
 	return playerWhitelist, err
 }
 func GetPlayerPlaytime(minecraftNickname string) (string, error) {
-	message, err := sendCommand(fmt.Sprintf("playtime %v", minecraftNickname))
+	message, err := sendCommand(fmt.Sprintf(Config.Commands.Playtime, minecraftNickname))
 	return message.Body[23+len(minecraftNickname):], err
 }
 func connectRconClient(rconAddress, rconPassword string) (*minecraft.Client, error) {
