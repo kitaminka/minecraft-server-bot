@@ -1,0 +1,8 @@
+{
+  "register": "authme register %v %v",
+  "unregister": "authme unregister %v",
+  "changePassword": "authme password %v %v",
+  "addWhitelist": "whitelist add %v",
+  "removeWhitelist": "whitelist remove %v",
+  "getWhitelist": "whitelist list"
+}

@@ -6,7 +6,7 @@
 git clone https://github.com/kitaminka/minecraft-server-bot.git
 ```
 - Create **.env** file and fill it. Example of .env file you can see in **.env.example** file.
-- Check **config.json**. By default, it is set to work with **[AuthMeReloaded](https://github.com/AuthMe/AuthMeReloaded/)**, but you can change config to work with any other authorization plugin.
+- By default, bot works with **[AuthMeReloaded](https://github.com/AuthMe/AuthMeReloaded/)** plugin, but you can change **config.json** to work with any other authorization plugin.
 - Start the bot:
 ```bash
 go run main.go

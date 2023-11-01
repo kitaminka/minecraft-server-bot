@@ -42,14 +42,14 @@ func RegisterMinecraftPlayer(minecraftNickname string) (string, error) {
 	if err != nil {
 		return password, err
 	}
-	_, err = sendCommand(fmt.Sprintf(Config.Commands.Register, minecraftNickname, password))
+	_, err = sendCommand(fmt.Sprintf(MinecraftCommands.Register, minecraftNickname, password))
 	if err != nil {
 		return password, err
 	}
 	return password, err
 }
 func UnregisterMinecraftPlayer(minecraftNickname string) error {
-	_, err := sendCommand(fmt.Sprintf(Config.Commands.Unregister, minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf(MinecraftCommands.Unregister, minecraftNickname))
 	return err
 }
 func ResetMinecraftPlayerPassword(minecraftNickname string) (string, error) {
@@ -58,11 +58,11 @@ func ResetMinecraftPlayerPassword(minecraftNickname string) (string, error) {
 	return password, err
 }
 func ChangeMinecraftPlayerPassword(minecraftNickname, newPassword string) error {
-	_, err := sendCommand(fmt.Sprintf(Config.Commands.ChangePassword, minecraftNickname, newPassword))
+	_, err := sendCommand(fmt.Sprintf(MinecraftCommands.ChangePassword, minecraftNickname, newPassword))
 	return err
 }
 func AddPlayerWhitelist(minecraftNickname string) error {
-	message, err := sendCommand(fmt.Sprintf(Config.Commands.AddWhitelist, minecraftNickname))
+	message, err := sendCommand(fmt.Sprintf(MinecraftCommands.AddWhitelist, minecraftNickname))
 	if err != nil {
 		return err
 	} else if message.Body == "Player is already whitelisted" {
@@ -72,18 +72,17 @@ func AddPlayerWhitelist(minecraftNickname string) error {
 	return err
 }
 func RemovePlayerWhitelist(minecraftNickname string) error {
-	_, err := sendCommand(fmt.Sprintf(Config.Commands.RemoveWhitelist, minecraftNickname))
+	_, err := sendCommand(fmt.Sprintf(MinecraftCommands.RemoveWhitelist, minecraftNickname))
 	return err
 }
 func GetPlayerWhitelist() ([]string, error) {
-	message, err := sendCommand(Config.Commands.GetWhitelist)
+	message, err := sendCommand(MinecraftCommands.GetWhitelist)
 	if err != nil {
 		return nil, err
 	} else if len(message.Body) <= 34 {
 		return []string{}, err
 	}
 	playerWhitelist := strings.Split(strings.Split(message.Body, "whitelisted players: ")[1], ", ")
-	playerWhitelist = playerWhitelist[1 : len(playerWhitelist)-1]
 	return playerWhitelist, err
 }
 func connectRconClient(rconAddress, rconPassword string) (*minecraft.Client, error) {

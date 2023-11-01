@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/minecraft-server-bot/connection"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,7 +25,7 @@ var Components = map[string]Component{
 		},
 		Handler: func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 			_, err := connection.GetPlayerByDiscord(interactionCreate.Member.User.ID)
-			if err != mongo.ErrNoDocuments {
+			if !errors.Is(err, mongo.ErrNoDocuments) {
 				interactionRespondError(session, interactionCreate.Interaction, "You are already registered.")
 				return
 			}

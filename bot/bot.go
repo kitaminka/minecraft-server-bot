@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	Intents        = 1535
-	RemoveCommands = false
+	Intents = 1535
 )
 
 func StartBot(token, guildId string) {
@@ -35,8 +34,4 @@ func StartBot(token, guildId string) {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
-
-	if RemoveCommands {
-		handlers.RemoveApplicationCommands(session)
-	}
 }

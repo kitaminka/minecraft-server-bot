@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/minecraft-server-bot/connection"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 )
 
@@ -18,7 +20,7 @@ var Handlers = []interface{}{
 	func(session *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 		switch interactionCreate.Type {
 		case discordgo.InteractionApplicationCommand:
-			Commands[interactionCreate.ApplicationCommandData().Name].Handler(session, interactionCreate)
+			CommandHandlers[interactionCreate.ApplicationCommandData().Name](session, interactionCreate)
 		case discordgo.InteractionMessageComponent:
 			Components[interactionCreate.MessageComponentData().CustomID].Handler(session, interactionCreate)
 		case discordgo.InteractionModalSubmit:
@@ -59,6 +61,10 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 	user := interactionCreate.Member.User
 
 	player, err := connection.GetPlayerByDiscord(user.ID)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		followupErrorMessageCreate(session, interactionCreate.Interaction, "You are not registered.")
+		return
+	}
 	if err != nil {
 		log.Printf("Error getting player: %v", err)
 		followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
