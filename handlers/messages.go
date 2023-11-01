@@ -30,15 +30,14 @@ func interactionRespondError(session *discordgo.Session, interaction *discordgo.
 		log.Printf("Error responding to interaction: %v", err)
 	}
 }
-func followupErrorMessageCreate(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) {
-	_, err := session.FollowupMessageCreate(interaction, true, &discordgo.WebhookParams{
+func interactionResponseErrorEdit(session *discordgo.Session, interaction *discordgo.Interaction, errorMessage string) {
+	_, err := session.InteractionResponseEdit(interaction, &discordgo.WebhookEdit{
 		Embeds: []*discordgo.MessageEmbed{
 			createErrorEmbed(errorMessage),
 		},
-		Flags: 1 << 6,
 	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Printf("Error editing interaction response: %v", err)
 	}
 }
 

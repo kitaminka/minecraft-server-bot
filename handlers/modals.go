@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/kitaminka/minecraft-server-bot/connection"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 )
 
@@ -38,14 +40,20 @@ var Modals = map[string]Modal{
 			user := interactionCreate.Member.User
 
 			player, err := connection.GetPlayerByDiscord(user.ID)
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				interactionRespondError(session, interactionCreate.Interaction, "You are not registered.")
+				return
+			}
 			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
+				return
 			}
 
 			password := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 			err = connection.ChangeMinecraftPlayerPassword(player.MinecraftNickname, password)
 			if err != nil {
 				interactionRespondError(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred changing player password: %v", err))
+				return
 			}
 
 			channel, messageErr := session.UserChannelCreate(user.ID)

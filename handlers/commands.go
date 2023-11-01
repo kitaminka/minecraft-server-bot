@@ -320,10 +320,10 @@ var CommandHandlers = map[string]CommandHandler{
 
 		password, err := connection.RegisterPlayer(options[0].UserValue(session).ID, minecraftNickname)
 		if errors.Is(err, connection.PlayerAlreadyExistsError) {
-			followupErrorMessageCreate(session, interactionCreate.Interaction, "Player already exists")
+			interactionResponseErrorEdit(session, interactionCreate.Interaction, "Player already exists")
 			return
 		} else if err != nil {
-			followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registring player: %v", err))
+			interactionResponseErrorEdit(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred registring player: %v", err))
 			connection.DeletePlayer(user.ID)
 			connection.RemovePlayerWhitelist(minecraftNickname)
 			return
@@ -430,7 +430,7 @@ var CommandHandlers = map[string]CommandHandler{
 		player, err := connection.UnregisterPlayer(user.ID)
 		if err != nil {
 			log.Printf("Error unregistring player: %v", err)
-			followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred unregistring player: %v", err))
+			interactionResponseErrorEdit(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred unregistring player: %v", err))
 			return
 		}
 

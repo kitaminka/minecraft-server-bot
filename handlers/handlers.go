@@ -62,19 +62,19 @@ func resetPasswordHandler(session *discordgo.Session, interactionCreate *discord
 
 	player, err := connection.GetPlayerByDiscord(user.ID)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		followupErrorMessageCreate(session, interactionCreate.Interaction, "You are not registered.")
+		interactionResponseErrorEdit(session, interactionCreate.Interaction, "You are not registered.")
 		return
 	}
 	if err != nil {
 		log.Printf("Error getting player: %v", err)
-		followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
+		interactionResponseErrorEdit(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred getting player: %v", err))
 		return
 	}
 
 	password, err := connection.ResetMinecraftPlayerPassword(player.MinecraftNickname)
 	if err != nil {
 		log.Printf("Error resetting player password: %v", err)
-		followupErrorMessageCreate(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred resetting player password: %v", err))
+		interactionResponseErrorEdit(session, interactionCreate.Interaction, fmt.Sprintf("Error occurred resetting player password: %v", err))
 		return
 	}
 
